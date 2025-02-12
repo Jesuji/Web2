@@ -19,10 +19,13 @@ const request = async (method, endpoint, data = null) => {
 };
 
 // 회원가입 API
-const postSignup = ({nickname, nationality, age, email, password}) => {
+const postSignUp = ({nickname, nationality, age, email, password}) => {
   return request('post', '/auth/sign', {nickname, nationality, age, email, password});
 };
 
+const postSignIn  = ({email, password}) => {
+  return request('post', '/auth/login', {email, password});
+};
 
 
 // 🍽️ 레스토랑 관련 API
@@ -48,7 +51,8 @@ const postReview = (restaurantId, reviewData) => {
 };
 
 module.exports = { 
-  postSignup,
+  postSignUp,
+  postSignIn,
   getRestaurants,
   searchRestaurants,
   getRestaurantById,
