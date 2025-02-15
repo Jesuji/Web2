@@ -3,21 +3,33 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
+import { UserProvider } from './contexts/UserContext';
 
 import SignUpScreen from './screens/SignUpScreen';
 import SignInScreen from './screens/SignInScreen';
 import HomeScreen from './screens/HomeScreen';
 import RestaurantDetailScreen from './screens/RestaurantDetailScreen';
+import ProfileScreen from './screens/ProfileScreen';
 
 
 const Stack = createStackNavigator();
 
 const App = () => {
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="SignIn">
+    <UserProvider>
+      <NavigationContainer>
+      <Stack.Navigator initialRouteName="Home">
 
-      <Stack.Screen name='SignUp' component={SignUpScreen} options={{headerShown: false}}/>
+      <Stack.Screen 
+      name='SignUp' 
+      component={SignUpScreen} 
+      options={{
+          headerShown: true,
+          title: '',
+          headerBackTitle: '로그인',
+        }
+      
+      }/>
       <Stack.Screen name='SignIn' component={SignInScreen} options={{headerShown: false}}/>
 
       <Stack.Screen
@@ -34,8 +46,18 @@ const App = () => {
           presentation: 'modal'
           }}/>
 
+      <Stack.Screen
+        name='Profile'
+        component={ProfileScreen}
+        options={{
+          title: '프로필',
+          headerBackTitle: '',
+        }}
+      />
+
       </Stack.Navigator>
     </NavigationContainer>
+    </UserProvider>
   );
 };
 

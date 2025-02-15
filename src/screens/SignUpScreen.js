@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { postSignUp } from '../services/api'; // api.js에서 postSignup 가져오기
-//import AsyncStorage from '@react-native-async-storage/async-storage'; 
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { postSignUp, postSignIn } from '../services/api';
 import InputField from '../components/InputField';
 import { useNavigation } from '@react-navigation/native';
+import { useUser } from '../contexts/UserContext';
 
 function SignUpScreen() {
   const [nickname, setNickname] = useState('');
@@ -14,7 +14,9 @@ function SignUpScreen() {
   const [passwordConfirm, setPasswordConfirm] = useState('');
 
   const nav = useNavigation();
+  const { setUser } = useUser();
 
+  //1.	회원가입 필드 검사
   const validateEmail = (email) => {const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);};
 
@@ -37,28 +39,34 @@ function SignUpScreen() {
       return;
     }
 
+    //2.	회원가입 요청
     try {
-      // 회원가입 요청
-      const response = postSignUp({
-        setNickname,
-        setNationality,
-        setAge,
-        setEmail,
-        setPassword,
-      });
+        const response = await postSignUp({
+          nickname,
+          nationality,
+          age: Number(age),
+          email,
+          password
+        });
+  
+        if (response && response.status === 200) {
 
-      if (response) {
-        Alert.alert('회원가입 성공', '회원가입이 완료되었습니다.');
-        // 추가적인 네비게이션 또는 상태 업데이트 작업
-        // await AsyncStorage.setItem('nickname', nickname);
-        // await AsyncStorage.setItem('email', email);
-        nav.navigate('Home');
-      }
-    } catch (error) {
+          //3.	닉네임 저장
+          setUser({ ...response.data, nickname: response.data.nickname });
+  
+          //4. 자동 로그인 (로그인 생략)
+          const loginResponse = await postSignIn({ email, password });
+  
+          if (loginResponse && loginResponse.status === 200) {
+            Alert.alert('회원가입 성공', '회원가입이 완료되었습니다.');
+            nav.navigate('Home');
+          }
+        }
+      } catch (error) {
         if (error.response) {
           // 중복된 닉네임
           if (error.response.status === 409) {
-            Alert.alert('오류', '중복된 닉네임입니다.');
+            Alert.alert('오류', '이미 사용 중인 이메일 또는 닉네임입니다.');
           }
           // 공란이 있을 경우
           else if (error.response.status === 400) {
@@ -99,18 +107,21 @@ function SignUpScreen() {
         keyboardType="email-address"
         value={email}
         onChangeText={setEmail}
+        autoCapitalize="none"
       />
       <InputField
         placeholder="비밀번호"
         secureTextEntry={true}
         value={password}
         onChangeText={setPassword}
+        autoCapitalize="none"
       />
       <InputField
         placeholder="비밀번호 확인"
         secureTextEntry={true}
         value={passwordConfirm}
         onChangeText={setPasswordConfirm}
+        autoCapitalize="none"
       />
 
       <TouchableOpacity style={styles.button} onPress={handleSignUp}>
@@ -126,16 +137,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   title: {
-    marginVertical: 55,
+    marginBottom: 45,
     fontSize: 30,
     fontWeight: 'bold',
     textAlign: 'center',
   },
   button: {
     backgroundColor: '#d3a26e',
-    marginVertical: 20,
+    marginVertical: 10,
     paddingVertical: 20,
-    paddingHorizontal: 40,
     borderRadius: 10,
     alignItems: 'center',
   },

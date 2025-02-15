@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
-//import { useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
 const Header = () => {
-  //const navigation = useNavigation();
+  const nav = useNavigation();
 
   return (
     <View style={styles.header}>
@@ -19,7 +19,7 @@ const Header = () => {
       </TouchableOpacity>
 
       {/* 프로필 버튼 */}
-      <TouchableOpacity style={styles.headerItem} >
+      <TouchableOpacity style={styles.headerItem} onPress={() => nav.navigate('Profile')} >
         <Text style={styles.headerText}>프로필</Text>
         <Image source={require('../../assets/images/profileicon.png')} style={styles.headerIcon} />
       </TouchableOpacity>

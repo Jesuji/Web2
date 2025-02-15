@@ -1,61 +1,52 @@
-/* 백엔드 api */
+import axios from 'axios';
+import CookieManager from '@react-native-cookies/cookies';
+import { API_BASE_URL } from './config';
 
-const axios = require('axios');
-const { API_BASE_URL } = require('./config');
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 10000,
+  withCredentials: true,
+});
 
-// 공통 api 호출 함수
-const request = async (method, endpoint, data = null) => {
-  try {
-    const response = await axios({
-      method,
-      url: `${API_BASE_URL}${endpoint}`,
-      data,
-    });
-    return response.data;
-  } catch (error) {
-    console.error(`API Error [${method.toUpperCase()} ${endpoint}]:`, error);
-    throw error;
+// 요청 인터셉터: 요청 시 자동으로 쿠키 추가
+api.interceptors.request.use(async (config) => {
+  const cookies = await CookieManager.get(API_BASE_URL);
+  const sessionId = cookies['SESSION_ID']?.value;
+  if (sessionId) {
+    config.headers['Cookie'] = `SESSION_ID=${sessionId}`;
   }
-};
+  return config;
+}, (error) => Promise.reject(error));
 
 // 회원가입 API
-const postSignUp = ({nickname, nationality, age, email, password}) => {
-  return request('post', '/auth/sign', {nickname, nationality, age, email, password});
-};
+const postSignUp = ({nickname, nationality, age, email, password}) => api.post('/auth/sign', {nickname, nationality, age, email, password});
 
-const postSignIn  = ({email, password}) => {
-  return request('post', '/auth/login', {email, password});
-};
+// 로그인 API
+const postSignIn = ({email, password}) => api.post('/auth/login', {email, password});
 
+// 로그아웃 API
+const postSignOut = ({ email, password }) => api.post('/auth/logout', {email, password});
 
 // 🍽️ 레스토랑 관련 API
-const getRestaurants = () => {
-  return request('get', '/restaurants');
-};
+const getRestaurants = () => api.get('/restaurants');
 
-const searchRestaurants = (query) => {
-  return request('get', `/restaurants/search?keyword=${query}`);
-};
+const searchRestaurants = (query) => api.get(`/restaurants/search?keyword=${query}`);
 
-const getRestaurantById = (id) => {
-  return request('get', `/restaurants/${id}`);
-};
+const getRestaurantById = (id) => api.get(`/restaurants/${id}`);
 
 // ✍️ 리뷰 관련 API
-const getReveiw = (id) => {
-  return request('get', `/restaurants/${id}/reviews`);
-};
+const getReview = (id) => api.get(`/restaurants/${id}/reviews`);
 
-const postReview = (restaurantId, reviewData) => {
-  return request('post', `/restaurants/${restaurantId}/reviews`, reviewData);
-};
+const postReview = (restaurantId, reviewData) => api.post(`/restaurants/${restaurantId}/reviews`, reviewData);
 
-module.exports = { 
+
+export { 
   postSignUp,
   postSignIn,
+  postSignOut,
   getRestaurants,
   searchRestaurants,
   getRestaurantById,
-  getReveiw,
+  getReview,
   postReview 
 };
