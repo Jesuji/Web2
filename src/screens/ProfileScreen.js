@@ -1,17 +1,14 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import {React, useState, useEffect} from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { useUser } from '../contexts/UserContext';
 import { logout } from '../services/auth';
+import { getMyProfile } from '../services/api';
 
 
-
-const recentReviews = [
-  { id: '1', place: '종로도담', review: '고기가 맛있고 밥도 무료로 주셔서 다' },
-  { id: '2', place: '종로도담', review: '고기가 맛있고 밥도 무료로 주셔서 다' },
-  { id: '3', place: '종로도담', review: '고기가 맛있고 밥도 무료로 주셔서 다' }
-];
 
 function ProfileScreen({ nav }) {
+
+  const [profile, setProfile] = useState(null);
 
   const { setUser } = useUser();
 
@@ -20,12 +17,18 @@ function ProfileScreen({ nav }) {
     nav.navigate('SignIn'); // 로그인 화면으로 이동
 };
 
-  const renderItem = ({ item }) => (
-    <View style={styles.reviewItem}>
-      <Text style={styles.reviewPlace}>{item.place}</Text>
-      <Text style={styles.reviewText}>{item.review}</Text>
-    </View>
-  );
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await getMyProfile();
+        setProfile(response.data);
+      } catch (error) {
+        console.error('프로필 조회 실패:', error);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
 
   return (
@@ -36,11 +39,10 @@ function ProfileScreen({ nav }) {
         <View style={styles.profileInfo}>
         <View style={styles.nameContainer}>
           <Text style={styles.profileName}>{setUser}</Text>
-          <Text style={styles.nicknameSuffix}> 님</Text> 
+          <Text style={styles.nicknameSuffix}> 님</Text>
         </View> 
-          <Text style={styles.profileCountry}>대한민국</Text>
-          <Text style={styles.profileReviews}>리뷰 12</Text>
-          <Text style={styles.profileStatus}>i love kimchi !!!! ❤️</Text>
+          <Text style={styles.profileCountry}>{profile?.nationality}</Text>
+          <Text style={styles.profileCountry}>{profile?.age}</Text>
         </View>
         <TouchableOpacity style={styles.editButton}>
           {/* <Image source={require('../../assets/images/edit_icon.png')} style={styles.editIcon} /> */}
@@ -49,13 +51,7 @@ function ProfileScreen({ nav }) {
 
       {/* 최근 작성한 리뷰 */}
       <View style={styles.reviewSection}>
-        <Text style={styles.reviewTitle}>최근 작성한 리뷰 12</Text>
-        <FlatList
-          data={recentReviews}
-          renderItem={renderItem}
-          keyExtractor={item => item.id}
-          style={styles.reviewList}
-        />
+        <Text style={styles.reviewTitle}>최근 작성한 리뷰 {profile?.reviewCount}</Text>
       </View>
 
       {/* 설정 및 메뉴 */}
@@ -84,13 +80,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   profileContainer: {
-    height:'18%',
+    height:'20%',
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFF8E1',  // 프로필 배경 색상
-    padding: 15,
+    padding: 20,
     borderRadius: 10,
-    marginBottom: 25,
+    marginBottom: 10,
   },
   avatar: {
     width: 70,
@@ -117,10 +113,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#888',
   },
-  profileReviews: {
-    fontSize: 15,
-    color: '#888',
-  },
   profileStatus: {
     marginTop: 5,
     fontSize: 14,
@@ -134,34 +126,17 @@ const styles = StyleSheet.create({
     height: 20,
   },
   reviewSection: {
-    marginBottom: 20,
+    padding: 10,
+    marginBottom: 10,
   },
   reviewTitle: {
     fontWeight: 'bold',
     fontSize: 17,
-    marginBottom: 15,
-  },
-  reviewList: {
-    marginBottom: 15,
-  },
-  reviewItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 13,
-    backgroundColor: '#E0E0E0',
-    borderRadius: 5,
-    marginBottom: 5,
-  },
-  reviewPlace: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    marginRight: 10,
-  },
-  reviewText: {
-    color: '#555',
+    marginVertical: 15,
   },
   menuSection: {
-    marginTop: 5,
+    padding: 10,
+    gap: 5,
   },
   menuItem: {
     fontSize: 17,

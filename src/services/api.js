@@ -27,6 +27,9 @@ const postSignIn = ({email, password}) => api.post('/auth/login', {email, passwo
 // 로그아웃 API
 const postSignOut = () => api.post('/auth/logout');
 
+// 프로필 조회 API
+const getMyProfile = () => api.get('/my-profile');
+
 // 🍽️ 레스토랑 관련 API
 const getRestaurants = () => api.get('/restaurants');
 
@@ -44,6 +47,7 @@ export {
   postSignUp,
   postSignIn,
   postSignOut,
+  getMyProfile,
   getRestaurants,
   searchRestaurants,
   getRestaurantById,
