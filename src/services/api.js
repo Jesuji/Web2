@@ -25,7 +25,7 @@ const postSignUp = ({nickname, nationality, age, email, password}) => api.post('
 const postSignIn = ({email, password}) => api.post('/auth/login', {email, password});
 
 // 로그아웃 API
-const postSignOut = ({ email, password }) => api.post('/auth/logout', {email, password});
+const postSignOut = () => api.post('/auth/logout');
 
 // 🍽️ 레스토랑 관련 API
 const getRestaurants = () => api.get('/restaurants');
@@ -48,5 +48,5 @@ export {
   searchRestaurants,
   getRestaurantById,
   getReview,
-  postReview 
+  postReview,
 };

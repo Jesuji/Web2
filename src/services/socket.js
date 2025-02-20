@@ -1,9 +1,10 @@
 /* websocket 연결 및 메시지 전송 */
 
-const WebSocket = require('ws');
+import WebSocket from 'ws';
+
 let wss;
 
-const initializeWebSocket = (server) => {
+export const initializeWebSocket = (server) => {
   wss = new WebSocket.Server({ server });
 
   wss.on('connection', (ws) => {
@@ -25,8 +26,6 @@ const initializeWebSocket = (server) => {
     });
   });
 };
-
-module.exports = { initializeWebSocket };
 
 //import { initializeWebSocket } from '../services/socket'; 
 //import { WS_SERVER_URL } from '../services/config';
