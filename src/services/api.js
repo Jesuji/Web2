@@ -31,6 +31,12 @@ const postSignOut = () => api.post('/auth/logout');
 const getMyProfile = () => api.get('/my-profile');
 
 // 🍽️ 레스토랑 관련 API
+const postMyLocation = (latitude, longitude, radius = 5) => {
+  return api.post('/restaurants/search/location', {
+    params: { latitude, longitude, radius }
+  });
+};
+
 const getRestaurants = () => api.get('/restaurants');
 
 const searchRestaurants = (query) => api.get(`/restaurants/search?keyword=${query}`);
@@ -48,6 +54,7 @@ export {
   postSignIn,
   postSignOut,
   getMyProfile,
+  postMyLocation,
   getRestaurants,
   searchRestaurants,
   getRestaurantById,
