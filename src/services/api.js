@@ -31,7 +31,7 @@ const postSignOut = () => api.post('/auth/logout');
 const getMyProfile = () => api.get('/my-profile');
 
 // 🍽️ 레스토랑 관련 API
-const postMyLocation = (latitude, longitude, radius = 5) => {
+const postMyLocation = (latitude, longitude, radius) => {
   return api.post('/restaurants/search/location', {
     params: { latitude, longitude, radius }
   });

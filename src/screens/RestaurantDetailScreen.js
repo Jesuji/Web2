@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ActivityIndicator, ScrollView, Image } from 're
 //import { getRestaurantById } from '../services/api';
 import { getReveiw } from '../services/api';
 
-import { dummySearchResults, dummyReviewResults } from '../dummy';
+import { dummyRestaurants } from '../dummy';
 
 const RestaurantDetail = ({route}) => {
   const [restaurant, setRestaurant] = useState(null);
@@ -18,12 +18,12 @@ const RestaurantDetail = ({route}) => {
       try {
         setLoading(true);
         // 레스토랑 정보 가져오기
-        const foundRestaurant = dummySearchResults.find(
+        const foundRestaurant = dummyRestaurants.find(
             (item) => item.id === restaurantId
           );
   
           // 해당 레스토랑에 대한 리뷰 필터링
-          const foundReviews = dummyReviewResults.reviews.filter(
+          const foundReviews = dummyRestaurants.reviews.filter(
             (reviews) => reviews.restaurantId === restaurantId
           );
 

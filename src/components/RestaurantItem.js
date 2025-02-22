@@ -16,8 +16,8 @@ const RestaurantItem = ({ item }) => {
   >
     <Text style={styles.name}>{item.name}</Text>
     <Text style={styles.category}>{item.category}</Text>
-    <Text style={styles.address}>{item.address}</Text>
     <Text style={styles.rating}>평점: {item.averageRating} (리뷰 {item.reviewCount})</Text>
+    <Text style={styles.distance}>거리: {item.distance}km</Text>
   </TouchableOpacity>
   );
   
@@ -48,6 +48,10 @@ const styles = StyleSheet.create({
     marginBottom: 1,
   },
   rating: {
+    fontSize: 14,
+    color: '#888',
+  },
+  distance: {
     fontSize: 14,
     color: '#888',
   },
