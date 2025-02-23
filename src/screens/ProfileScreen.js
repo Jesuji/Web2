@@ -5,16 +5,15 @@ import { logout } from '../services/auth';
 import { getMyProfile } from '../services/api';
 
 
-
-function ProfileScreen({ nav }) {
+function ProfileScreen({ navigation }) {
 
   const [profile, setProfile] = useState(null);
 
-  const { setUser } = useUser();
+  const { user, setUser } = useUser();
 
   const handleLogout = async () => {
     await logout(setUser); // 로그아웃 요청
-    nav.navigate('SignIn'); // 로그인 화면으로 이동
+    navigation.navigate('SignIn');
 };
 
   useEffect(() => {
@@ -37,22 +36,26 @@ function ProfileScreen({ nav }) {
       <View style={styles.profileContainer}>
         <Image source={require('../../assets/images/profile.png')} style={styles.avatar} />
         <View style={styles.profileInfo}>
-        <View style={styles.nameContainer}>
-          <Text style={styles.profileName}>{setUser}</Text>
-          <Text style={styles.nicknameSuffix}> 님</Text>
-        </View> 
+          <View style={styles.nameContainer}>
+            <Text style={styles.profileName}>{user?.nickname}</Text>
+            <Text style={styles.nicknameSuffix}> 님!</Text>
+          </View> 
           <Text style={styles.profileCountry}>{profile?.nationality}</Text>
-          <Text style={styles.profileCountry}>{profile?.age}</Text>
+          <Text style={styles.profileCountry}>{profile?.age}세</Text>
         </View>
+        
         <TouchableOpacity style={styles.editButton}>
           {/* <Image source={require('../../assets/images/edit_icon.png')} style={styles.editIcon} /> */}
         </TouchableOpacity>
+
       </View>
 
       {/* 최근 작성한 리뷰 */}
       <View style={styles.reviewSection}>
-        <Text style={styles.reviewTitle}>최근 작성한 리뷰 {profile?.reviewCount}</Text>
+          <Text style={styles.reviewTitle}>최근 작성한 리뷰 {profile?.reviewCount}</Text>
       </View>
+
+      
 
       {/* 설정 및 메뉴 */}
       <View style={styles.menuSection}>
@@ -80,7 +83,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   profileContainer: {
-    height:'20%',
+    height: '23%',
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFF8E1',  // 프로필 배경 색상
@@ -107,9 +110,10 @@ const styles = StyleSheet.create({
   },
   profileName: {
     fontWeight: 'bold',
-    fontSize: 20,
+    fontSize: 18,
   },
   profileCountry: {
+    marginTop: 5,
     fontSize: 15,
     color: '#888',
   },
@@ -135,8 +139,9 @@ const styles = StyleSheet.create({
     marginVertical: 15,
   },
   menuSection: {
+    marginTop: 10,
     padding: 10,
-    gap: 5,
+    gap: 10,
   },
   menuItem: {
     fontSize: 17,

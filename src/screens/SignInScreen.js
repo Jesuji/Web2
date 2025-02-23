@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import InputField from '../components/InputField';
@@ -30,15 +30,13 @@ const SignInScreen = () => {
       try {
         const response = await login(email, password, setUser);
 
-        console.log('서버 응답:', response);
-
         if (response.status === 200) {
           Alert.alert('로그인 성공', '로그인이 완료되었습니다.');
           nav.navigate('Home');
         }
       } catch (error) {
         console.log('오류 상세:', error);
-        Alert.alert('로그인 실패', '아이디 또는 비밀번호가 잘못되었습니다.');
+        Alert.alert('로그인 실패', '로그인에 실패하였습니다.');
       }
     };
   

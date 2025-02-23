@@ -4,7 +4,7 @@ import SearchBar from '../components/SearchBar';
 import RestaurantItem from '../components/RestaurantItem';
 import Geolocation from '@react-native-community/geolocation';
 import MapView, { Marker } from 'react-native-maps';
-import { postMyLocation } from '../services/api'; 
+import { postMyLocation } from '../services/api';
 
 import Header from '../components/Header';
 
@@ -29,8 +29,8 @@ const HomeScreen = () => {
         const lat = 37.4979;  // 강남역 위도
         const lon = 127.0276;  // 강남역 경도
 
-        setLatitude(lat);  // setLatitude에 숫자 그대로 넘기기
-        setLongitude(lon); // setLongitude에 숫자 그대로 넘기기
+        setLatitude(lat);
+        setLongitude(lon);
         getRestaurants(lat, lon);
       },
       (error) => {
@@ -100,7 +100,7 @@ const HomeScreen = () => {
           keyExtractor={(item) => item.id.toString()}
         />
 
-        <Button title="현재 위치 가져오기" onPress={geoLocation} />
+        <Button title="현재 위치로 보기" onPress={geoLocation} />
 
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>

@@ -26,11 +26,22 @@
 	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
-	  <!-- Do not change NSAllowsArbitraryLoads to true, or you will risk app rejection! -->
-		<key>NSAllowsArbitraryLoads</key>
-		<false/>
-		<key>NSAllowsLocalNetworking</key>
+	<key>NSAllowsArbitraryLoads</key>
+	<false/>
+	<key>NSAllowsLocalNetworking</key>
+	<true/>
+	<key>NSExceptionDomains</key>
+	<dict>
+		<key>ngrok-free.app</key> <!-- 여기에 ngrok 기본 도메인 넣기 -->
+		<dict>
+		<key>NSIncludesSubdomains</key>
 		<true/>
+		<key>NSTemporaryExceptionAllowsInsecureHTTPSLoads</key>
+		<true/>
+		<key>NSTemporaryExceptionMinimumTLSVersion</key>
+		<string>TLSv1.1</string>
+		</dict>
+	</dict>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>앱을 사용할 때 위치를 사용합니다.</string>

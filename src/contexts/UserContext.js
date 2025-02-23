@@ -10,12 +10,8 @@ export const UserProvider = ({ children }) => {
     // 추가적인 유저 정보들
   });
 
-  const setUserData = (nickname, nationality) => {
-    setUser({ nickname, nationality });
-  };
-
   return (
-    <UserContext.Provider value={{ user, setUserData }}>
+    <UserContext.Provider value={{ user, setUser }}>
       {children}
     </UserContext.Provider>
   );

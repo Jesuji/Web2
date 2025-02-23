@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, ScrollView, Image } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator, ScrollView, Image, TouchableOpacity } from 'react-native';
 //import { getRestaurantById } from '../services/api';
-import { getReveiw } from '../services/api';
+import { getReview } from '../services/api';
 
-import { dummyRestaurants } from '../dummy';
+import { dummyRestaurantDetail } from '../dummy';
 
 const RestaurantDetail = ({route}) => {
   const [restaurant, setRestaurant] = useState(null);
@@ -13,23 +13,26 @@ const RestaurantDetail = ({route}) => {
 
   const { restaurantId } = route.params;
 
+  const scrollViewRef = useRef(null);
+  const scrollToReviews = () => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({ y: 300, animated: true }); // 적절한 y 값 조정
+    }
+  };
+
   useEffect(() => {
     const fetchRestaurantDetails = () => {
       try {
         setLoading(true);
-        // 레스토랑 정보 가져오기
-        const foundRestaurant = dummyRestaurants.find(
-            (item) => item.id === restaurantId
-          );
-  
-          // 해당 레스토랑에 대한 리뷰 필터링
-          const foundReviews = dummyRestaurants.reviews.filter(
-            (reviews) => reviews.restaurantId === restaurantId
-          );
+      // 레스토랑 정보 가져오기
+      const foundRestaurant = dummyRestaurantDetail.find(
+        (item) => item.id === restaurantId
+      );
 
-        if (foundRestaurant) {
-          setRestaurant(foundRestaurant);
-          setReviews(foundReviews);
+      if (foundRestaurant) {
+        setRestaurant(foundRestaurant);
+        // 해당 레스토랑에 대한 리뷰 설정
+        setReviews(foundRestaurant.reviews || []); // reviews가 없으면 빈 배열로 설정
         } else {
           setError('식당 정보를 찾을 수 없습니다.');
         }
@@ -89,14 +92,19 @@ const RestaurantDetail = ({route}) => {
     <View style={styles.container}>
       <Text style={styles.name}>{restaurant.name}</Text>
       <Text style={styles.category}>{restaurant.category}</Text>
-      <Text style={styles.address}>{restaurant.address}</Text>
-      <Text style={styles.weekdays}>평일 운영시간: {restaurant.weekdays}</Text>
-      <Text style={styles.weekend}>주말 운영시간: {restaurant.weekend}</Text>
-      <Text style={styles.rating}>평점: {restaurant.averageRating}</Text>
-      <Text style={styles.reviewCount}>리뷰 수: {restaurant.reviewCount}</Text>
+      <Image source={{ uri: restaurant.imageUrl }} style={styles.restaurantImage} />
+      <Text style={styles.address}>| {restaurant.address}</Text>
+      <Text style={styles.weekdays}>| 평일 운영시간: {restaurant.weekdays}</Text>
+      <Text style={styles.weekend}>| 주말 운영시간: {restaurant.weekend}</Text>
+      <Text style={styles.rating}>| 평점: {restaurant.averageRating}</Text>
+      <Text style={styles.reviewCount}>| 리뷰 수: {restaurant.reviewCount}</Text>
+  
+     
+        <TouchableOpacity style={styles.showReview} onPress={scrollToReviews} >
+        <Text style={styles.showReviewText}>📝 노마드 리뷰보기</Text> 
+        </TouchableOpacity>
 
-      <Text style={styles.reviewTitle}>노마드 리뷰 📝</Text>
-      <Text>nom:ad 사용자들의 생생한 리뷰에요 :)</Text>
+      <Text>nom:ad 사용자들의 생생한 리뷰에요</Text>
       <ScrollView style={styles.reviewSection}>
         {reviews.length > 0 ? (
           reviews.map((review, index) => (
@@ -104,7 +112,7 @@ const RestaurantDetail = ({route}) => {
               <View style={styles.reviewHeader}>
                 <Text style={styles.reviewNickname}>{review.nickName} ({review.nationality})</Text> 
                 <Text style={styles.reviewRating}>⭐ {review.rating}</Text>
-            </View>
+              </View>
               <Text>{review.message}</Text>
               {review.imageURL && (
                 <Image source={{ uri: review.imageURL }} style={styles.reviewImage} />
@@ -112,6 +120,7 @@ const RestaurantDetail = ({route}) => {
               <Text>{review.createdAt} 작성됨</Text>
             </View>
           ))
+
         ) : (
           <Text>리뷰가 없습니다.</Text>
         )}
@@ -126,13 +135,19 @@ const styles = StyleSheet.create({
       backgroundColor: '#fff',
     },
     name: {
-      fontSize: 25,
+      fontSize: 26,
       fontWeight: 'bold',
       marginBottom: 13,
     },
     category: {
       fontSize: 18,
       color: '#888',
+      marginBottom: 20,
+    },
+    restaurantImage: {
+      width: '100%',
+      height: 200,
+      borderRadius: 8,
       marginBottom: 20,
     },
     address: {
@@ -163,10 +178,16 @@ const styles = StyleSheet.create({
     reviewSection: {
       marginTop: 20,
     },
-    reviewTitle: {
+    showReview: {
+      flex: 1,
+      backgroundColor: '#f9f9f9',
+      borderRadius: 8,
+      marginVertical: 30,
+    },
+    showReviewText: {
       fontSize: 20,
       fontWeight: 'bold',
-      marginVertical: 15,
+      padding: 20,
     },
     reviewItem: {
       backgroundColor: '#f9f9f9',
