@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, ScrollView, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Image, TouchableOpacity, FlatList } from 'react-native';
 //import { getRestaurantById } from '../services/api';
 import { getReview } from '../services/api';
 
@@ -13,12 +13,14 @@ const RestaurantDetail = ({route}) => {
 
   const { restaurantId } = route.params;
 
-  const scrollViewRef = useRef(null);
+  const flatListRef = useRef(null);
+
   const scrollToReviews = () => {
-    if (scrollViewRef.current) {
-      scrollViewRef.current.scrollTo({ y: 300, animated: true }); // 적절한 y 값 조정
+    if (flatListRef.current) {
+      flatListRef.current.scrollToIndex({ index: 0, animated: true });
     }
   };
+
 
   useEffect(() => {
     const fetchRestaurantDetails = () => {
@@ -45,6 +47,8 @@ const RestaurantDetail = ({route}) => {
 
     fetchRestaurantDetails();
   }, [restaurantId]);
+
+  
 
 //   useEffect(() => {
 //     const fetchRestaurantDetails = async () => {
@@ -89,55 +93,77 @@ const RestaurantDetail = ({route}) => {
     );
   }
   return (
-    <View style={styles.container}>
-      <Text style={styles.name}>{restaurant.name}</Text>
-      <Text style={styles.category}>{restaurant.category}</Text>
-      <Image source={{ uri: restaurant.imageUrl }} style={styles.restaurantImage} />
-      <Text style={styles.address}>| {restaurant.address}</Text>
-      <Text style={styles.weekdays}>| 평일 운영시간: {restaurant.weekdays}</Text>
-      <Text style={styles.weekend}>| 주말 운영시간: {restaurant.weekend}</Text>
-      <Text style={styles.rating}>| 평점: {restaurant.averageRating}</Text>
-      <Text style={styles.reviewCount}>| 리뷰 수: {restaurant.reviewCount}</Text>
-  
-     
-        <TouchableOpacity style={styles.showReview} onPress={scrollToReviews} >
-        <Text style={styles.showReviewText}>📝 노마드 리뷰보기</Text> 
-        </TouchableOpacity>
 
-      <Text>nom:ad 사용자들의 생생한 리뷰에요</Text>
-      <ScrollView style={styles.reviewSection}>
-        {reviews.length > 0 ? (
-          reviews.map((review, index) => (
-            <View key={index} style={styles.reviewItem}>
-              <View style={styles.reviewHeader}>
-                <Text style={styles.reviewNickname}>{review.nickName} ({review.nationality})</Text> 
-                <Text style={styles.reviewRating}>⭐ {review.rating}</Text>
-              </View>
-              <Text>{review.message}</Text>
-              {review.imageURL && (
-                <Image source={{ uri: review.imageURL }} style={styles.reviewImage} />
-              )}
-              <Text>{review.createdAt} 작성됨</Text>
-            </View>
-          ))
+    <View style={{ flex: 1, backgroundColor: '#fff'}}>
+    {/* 고정 헤더 */}
+      <View style={styles.fixedHeader}>
+        <Text style={styles.name}>{restaurant.name}</Text>
+        <Text style={styles.category}>{restaurant.category}</Text>
+      </View>
 
-        ) : (
-          <Text>리뷰가 없습니다.</Text>
-        )}
-      </ScrollView>
+    <FlatList
+      ref={flatListRef}
+      data={reviews}
+      initialNumToRender={5}   // 처음에 5개만 렌더링
+      maxToRenderPerBatch={5}  // 한 번에 5개씩 추가 렌더링
+      keyExtractor={(item, index) => index.toString()}
+      ListHeaderComponent={
+        <View style={styles.container}>
+          <Image source={{ uri: restaurant.imageUrl }} style={styles.restaurantImage} />
+          <Text style={styles.address}>📍 {restaurant.address}</Text>
+          <Text style={styles.weekdays}>📍 평일 운영시간: {restaurant.weekdays}</Text>
+          <Text style={styles.weekend}>📍 주말 운영시간: {restaurant.weekend}</Text>
+          <Text style={styles.rating}>📍 평점: {restaurant.averageRating}</Text>
+          <Text style={styles.reviewCount}>📍 리뷰 수: {restaurant.reviewCount}</Text>
+
+          {/* 리뷰 보기 버튼 */}
+          <View style={styles.reviewButton}>
+          <TouchableOpacity style={styles.showReview}>
+            <Text style={styles.showReviewText}>리뷰작성</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.showReview} onPress={scrollToReviews}>
+            <Text style={styles.showReviewText}>리뷰보기</Text>
+          </TouchableOpacity>
+          </View>
+
+        </View>
+      }
+      renderItem={({ item }) => (
+        <View style={styles.reviewItem}>
+          <View style={styles.reviewHeader}>
+            <Text style={styles.reviewNickname}>{item.nickName} ({item.nationality})</Text>
+            <Text style={styles.reviewRating}>⭐ {item.rating}</Text>
+          </View>
+          <Text>{item.message}</Text>
+          {item.imageURL && (
+            <Image source={{ uri: item.imageURL }} style={styles.reviewImage} />
+          )}
+          <Text>{item.createdAt} 작성됨</Text>
+        </View>
+      )}
+      style={{ marginTop: 100 }}
+    />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
     container: {
-      padding: 25,
+      padding: 20,
       backgroundColor: '#fff',
+    },
+    fixedHeader: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: '#fff',
+      padding: 25,
     },
     name: {
       fontSize: 26,
       fontWeight: 'bold',
-      marginBottom: 13,
+      marginBottom: 15,
     },
     category: {
       fontSize: 18,
@@ -175,26 +201,39 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       alignItems: 'center',
     },
-    reviewSection: {
-      marginTop: 20,
+    reviewButton: {
+      flex: 1,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: 60,
+      padding: 10,
+      marginTop: 50,
     },
     showReview: {
-      flex: 1,
       backgroundColor: '#f9f9f9',
+      padding: 10,
+      paddingHorizontal: 40,
       borderRadius: 8,
-      marginVertical: 30,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.2,
+      shadowRadius: 2,
     },
     showReviewText: {
-      fontSize: 20,
+      fontSize: 17,
       fontWeight: 'bold',
-      padding: 20,
     },
     reviewItem: {
       backgroundColor: '#f9f9f9',
-      padding: 10,
+      padding: 15,
       borderRadius: 8,
       marginBottom: 10,
       gap: 3,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.2,
+      shadowRadius: 2,
     },
     reviewHeader: {
       flexDirection: 'row',

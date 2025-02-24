@@ -95,6 +95,17 @@
             hashtags: "쌀국수, 짜조",
             imageURL: null //사진을 안올렸단 뜻
         },
+        {
+            nickName: "명성",
+            nationality: "베트남",
+            message: "맛도리",
+            rating: 5,
+            createdAt: "2024-09-21-00:35",
+            updatedAt: "2024-09-29-00:36", //리뷰 마지막 수정 날짜
+            hashtags: "쌀국수, 짜조",
+            imageURL: null //사진을 안올렸단 뜻
+        },
+        
     ],
       averageRating: 4.5,
       imageUrl: "https://cdn.pixabay.com/photo/2023/05/27/12/35/noodles-8021415_1280.png"
