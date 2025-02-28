@@ -44,9 +44,10 @@ const searchRestaurants = (query) => api.get(`/restaurants/search?keyword=${quer
 const getRestaurantById = (id) => api.get(`/restaurants/${id}`);
 
 // ✍️ 리뷰 관련 API
+//리뷰 조회
 const getReview = (id) => api.get(`/restaurants/${id}/reviews`);
-
-const postReview = (restaurantId, reviewData) => api.post(`/restaurants/${restaurantId}/reviews`, reviewData);
+//리뷰 작성
+const postReview = (restaurantId, reviewDTO) => api.post(`/reviews/new?${restaurantId}`, reviewDTO);
 
 
 export { 

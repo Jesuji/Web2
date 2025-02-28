@@ -173,3 +173,27 @@
         reviewCount: 10,
       },
   ]
+
+
+export const dummyGetMyReview = [
+  {
+    id: 3,
+    name: "효자동쌀국수미",
+    rating: 4,
+    message: "여기 진짜 맛도리감자탕인데 나만 오기는 아쉽고 해서 소개드리는데 잔짜 쌀국수 맛있어요",
+    createdAt: "2024-09-21-00:35",
+    updatedAt: "2024-09-29-00:36", //리뷰 마지막 수정 날짜
+    hashtags: "쌀국수, 짜조",
+    imageURL: null
+  },
+  {
+    id: 4,
+    name: "닭칼국수",
+    rating: 4,
+    message: "여기 진짜 맛도리감자탕인데 나만 오기는 아쉽고 해서 소개드리는데 잔짜 쌀국수 맛있어요",
+    createdAt: "2024-09-21-00:35",
+    updatedAt: "2024-09-29-00:36", //리뷰 마지막 수정 날짜
+    hashtags: "칼국수, 한식",
+    imageURL: null
+  },
+]

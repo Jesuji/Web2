@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Image, TouchableOpacity, FlatList, Modal, TextInput } from 'react-native';
-//import { getRestaurantById } from '../services/api';
+import { View, Text, StyleSheet, ActivityIndicator, Image, TouchableOpacity, FlatList, Alert } from 'react-native';
+import { getRestaurantById } from '../services/api';
 import { getReview } from '../services/api';
+import ReviewModal from '../components/ReviewModal';
 
 import { dummyRestaurantDetail } from '../dummy';
 
@@ -11,7 +12,6 @@ const RestaurantDetail = ({route}) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [modalVisible, setModalVisible] = useState(false); // 모달 상태 추가
-  const [reviewText, setReviewText] = useState('');
 
   const { restaurantId } = route.params;
 
@@ -24,9 +24,9 @@ const RestaurantDetail = ({route}) => {
   };
 
   const submitReview = () => {
-    console.log(`리뷰 등록! 식당 ID: ${restaurantId}, 내용: ${reviewText}`);
+    Alert.alert("리뷰 등록 완료!");
+    console.log(`리뷰 등록 완료! 식당 ID: ${restaurantId}`);
     setModalVisible(false); // 모달 닫기
-    setReviewText(''); // 입력 필드 초기화
   };
 
 
@@ -129,6 +129,14 @@ const RestaurantDetail = ({route}) => {
           <TouchableOpacity style={styles.showReview}   onPress={() => setModalVisible(true)}>
             <Text style={styles.showReviewText}>리뷰작성</Text>
           </TouchableOpacity>
+
+          <ReviewModal
+            visible={modalVisible}
+            onClose={() => setModalVisible(false)}
+            onSubmit={submitReview}
+            restaurantId={restaurantId}
+          />
+
           <TouchableOpacity style={styles.showReview} onPress={scrollToReviews}>
             <Text style={styles.showReviewText}>리뷰보기</Text>
           </TouchableOpacity>
@@ -140,7 +148,7 @@ const RestaurantDetail = ({route}) => {
         <View style={styles.reviewItem}>
           <View style={styles.reviewHeader}>
             <Text style={styles.reviewNickname}>{item.nickName} ({item.nationality})</Text>
-            <Text style={styles.reviewRating}>⭐ {item.rating}</Text>
+            <Text style={styles.reviewRating}>★{item.rating}</Text>
           </View>
           <Text>{item.message}</Text>
           {item.imageURL && (
@@ -151,28 +159,6 @@ const RestaurantDetail = ({route}) => {
       )}
       style={{ marginTop: 100 }}
     />
-
-    {/* 리뷰 작성 모달 */}
-    <Modal visible={modalVisible} animationType="slide" transparent>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
-              <Text style={styles.closeText}>X</Text>
-            </TouchableOpacity>
-            <Text style={styles.modalTitle}>리뷰 작성</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="노마드 이용자들에게 생생한 후기를 전달해주세요!"
-              multiline
-              value={reviewText}
-              onChangeText={setReviewText}
-            />
-            <TouchableOpacity style={styles.submitButton} onPress={submitReview}>
-              <Text style={styles.submitText}>등록</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
 
     </View>
   );
@@ -284,60 +270,6 @@ const styles = StyleSheet.create({
       height: 200,
       marginTop: 10,
       borderRadius: 8,
-    },
-    modalContainer: {
-      flex: 1,
-      justifyContent: 'flex-end',
-      alignItems: 'center',
-    },
-    modalContent: {
-      width: '100%',
-      height: '70%',
-      backgroundColor: '#fff',
-      padding: 20,
-      borderRadius: 10,
-      alignItems: 'center',
-
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: -5 }, // 위쪽 방향으로 그림자
-      shadowOpacity: 0.2, 
-      shadowRadius: 10,
-      elevation: 10,
-    },
-    closeButton: {
-      position: 'absolute',
-      top: 10,
-      right: 15,
-    },
-    closeText: {
-      fontSize: 22,
-      fontWeight: 'bold',
-    },
-    modalTitle: {
-      fontSize: 22,
-      fontWeight: 'bold',
-      marginBottom: 20,
-    },
-    input: {
-      width: '100%',
-      height: '40%',
-      borderWidth: 1,
-      borderColor: '#ccc',
-      borderRadius: 8,
-      padding: 10,
-      textAlignVertical: 'top',
-    },
-    submitButton: {
-      marginTop: 20,
-      backgroundColor: '#3498db',
-      paddingVertical: 10,
-      paddingHorizontal: 30,
-      borderRadius: 8,
-    },
-    submitText: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      color: '#fff',
     },
   });
 

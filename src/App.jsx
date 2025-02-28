@@ -10,6 +10,7 @@ import SignInScreen from './screens/SignInScreen';
 import HomeScreen from './screens/HomeScreen';
 import RestaurantDetailScreen from './screens/RestaurantDetailScreen';
 import ProfileScreen from './screens/ProfileScreen';
+import MyReviewScreen from './screens/MyReviewScreen';
 
 
 const Stack = createStackNavigator();
@@ -42,7 +43,7 @@ const App = () => {
         component={RestaurantDetailScreen}
         options={{
           title: '음식점 상세 정보',
-          headerBackTitle: '뒤로가기',
+          headerBackTitle: '',
           presentation: 'modal'
           }}/>
 
@@ -51,6 +52,14 @@ const App = () => {
         component={ProfileScreen}
         options={{
           title: '프로필',
+          headerBackTitle: '',
+        }}
+      />
+      <Stack.Screen
+        name='MyReview'
+        component={MyReviewScreen}
+        options={{
+          title: '내 리뷰',
           headerBackTitle: '',
         }}
       />
