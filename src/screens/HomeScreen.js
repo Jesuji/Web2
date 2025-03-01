@@ -4,7 +4,7 @@ import SearchBar from '../components/SearchBar';
 import RestaurantItem from '../components/RestaurantItem';
 import Geolocation from '@react-native-community/geolocation';
 import MapView, { Marker } from 'react-native-maps';
-import { postMyLocation } from '../services/api';
+import { postMyLocation, searchRestaurants } from '../services/api';
 
 import Header from '../components/Header';
 
@@ -12,12 +12,12 @@ import { dummyRestaurants} from '../dummy';
 
 
 const HomeScreen = () => {
-  //const searchResults = useSearch(searchQuery, isSearchActive);
-  const [searchQuery, setSearchQuery] = useState('');
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
   const [region, setRegion] = useState(null);
   const [restaurants, setRestaurants] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
 
   const location = latitude && longitude ? { latitude, longitude, latitudeDelta: 0.045, longitudeDelta: 0.045 } : null;
 
@@ -52,6 +52,30 @@ const HomeScreen = () => {
   };
 
 
+  // 검색어 필터링
+  const filteredRestaurants = restaurants.filter((restaurant) => {
+    return restaurant.name.toLowerCase().includes(searchQuery.toLowerCase());
+  });
+
+  // 검색어 상태가 변할 때 검색 모드 활성화
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    if (query.length > 0) {
+      setIsSearching(true);  // 검색어가 있으면 검색 모드로 전환
+      searchRestaurants(query)  // searchRestaurants 호출
+        .then((response) => {
+          setRestaurants(response.data);  // 받아온 검색된 레스토랑 데이터 저장
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    } else {
+      setIsSearching(false);  // 검색어가 없으면 기본 화면
+    }
+  };
+
+
+
   useEffect(() => {
     if (latitude && longitude) {
       const newRegion = {
@@ -67,40 +91,57 @@ const HomeScreen = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <KeyboardAvoidingView style={styles.container}>
+      <KeyboardAvoidingView style={[styles.container, isSearching && styles.searchingBackground]}>
         <Header/>
         <SearchBar
           placeholder="지금 먹고 싶은 고향 음식은?"
           value={searchQuery}
-          onChange={setSearchQuery}
-          //onFocus={() => setIsSearchActive(true)}
+          onChange={handleSearch}
         />
 
-        <View style={styles.mapContainer}>
-            <MapView style={styles.map} region={region} onRegionChangeComplete={(region) => {
-              setLatitude(region.latitude);
-              setLongitude(region.longitude);
-            }}>
-              <Marker coordinate={region} title="내 위치" />
+      
 
-              {restaurants.map((restaurant) => (
-                <Marker
-                  //key={restaurant.id} ❤️ id 값 넘겨받을 수 있을까요??
-                  coordinate={{ latitude: restaurant.latitude, longitude: restaurant.longitude }} 
-                  title={restaurant.name}
-                />
-              ))}
+      {isSearching ? (
+          <>
+        <Text style={styles.searchingText}></Text>
+        
+        {filteredRestaurants.length === 0 ? (
+          <Text style={styles.noResultsText}>검색 결과가 없습니다.</Text>
+        ) : (
+          <FlatList
+            data={filteredRestaurants}
+            renderItem={({ item }) => <RestaurantItem item={item} />}
+            keyExtractor={(item) => item.id.toString()}
+          />
+        )}
+      </>
+        ) : (
+          <>
+            <View style={styles.mapContainer}>
+              <MapView style={styles.map} region={region} onRegionChangeComplete={(region) => {
+                setLatitude(region.latitude);
+                setLongitude(region.longitude);
+              }}>
+                <Marker coordinate={region} title="내 위치" />
 
-            </MapView>
-        </View>
+                {restaurants.map((restaurant) => (
+                  <Marker
+                    key={restaurant.id}
+                    coordinate={{ latitude: restaurant.latitude, longitude: restaurant.longitude }}
+                    title={restaurant.name}
+                  />
+                ))}
+              </MapView>
+            </View>
 
-        <FlatList
-          data={dummyRestaurants}
-          renderItem={({ item }) => <RestaurantItem item={item} />}
-          keyExtractor={(item) => item.id.toString()}
-        />
-
-        <Button title="현재 위치로 보기" onPress={geoLocation} />
+            <FlatList
+              data={dummyRestaurants}
+              renderItem={({ item }) => <RestaurantItem item={item} />}
+              keyExtractor={(item) => item.id.toString()}
+            />
+            <Button title="현재 위치로 보기" onPress={geoLocation} />
+          </>
+        )}
 
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
@@ -113,6 +154,19 @@ const styles = StyleSheet.create({
       flex: 1,
       backgroundColor: '#fff',
       padding: 17,
+    },
+    searchingText: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: '#333',  // 검색 중일 때 텍스트 색상
+      textAlign: 'center',
+      marginVertical: 20,  // 위아래 여백 추가
+    },
+    noResultsText: {
+      fontSize: 16,
+      color: '#888',  // 검색 결과 없을 때 색상
+      textAlign: 'center',
+      marginTop: 20,
     },
     mapContainer: {
       height: 200,

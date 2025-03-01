@@ -2,23 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import ReviewModal from '../components/ReviewModal';
-import { getUserReviews, deleteReview } from '../services/api';
+import { getMyReview, getReview, editReview, deleteReview } from '../services/api';
 import { dummyGetMyReview } from '../dummy';
 
-const MyReviewScreen = () => {
-  const [reviews, setReviews] = useState([]);
-  const [selectedReview, setSelectedReview] = useState(null); // 수정할 리뷰
+const MyReviewScreen = ({route}) => {
+  const { reviewCount } = route.params;
+  const [reviews, setReviews] = useState([]); //전체 리뷰 목록
+  const [selectedReview, setSelectedReview] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  const [mode, setMode] = useState('view');
 
-  // 유저가 작성한 리뷰 목록 불러오기
+  // 리뷰 목록 불러오기
   useEffect(() => {
     fetchReviews();
   }, []);
 
   const fetchReviews = async () => {
     try {
-      const response = await getUserReviews(); // 유저 리뷰 불러오기 API 호출
+      const response = await getMyReview();
       setReviews(response);
     } catch (error) {
       console.error("리뷰 목록 불러오기 실패:", error);
@@ -26,16 +27,16 @@ const MyReviewScreen = () => {
   };
   
   // 리뷰 조회
-  const handleView = (item) => {
-    setSelectedReview(item);
-    setIsEditing(false);
-    setModalVisible(true);    // 모달 열기
-  };
+  const handleView = (review) => {
+    setSelectedReview(review);
+    setMode('view');
+    setModalVisible(true);
+  };;
 
   // 리뷰 수정
   const handleEdit = (review) => {
     setSelectedReview(review);
-    setIsEditing(true);
+    setMode('edit');
     setModalVisible(true);
   };
 
@@ -63,12 +64,12 @@ const MyReviewScreen = () => {
     ]);
   };
 
-  const renderRightActions = (item) => (
+  const renderRightActions = (review) => (
     <View style={styles.actionContainer}>
-      <TouchableOpacity onPress={() => handleEdit(item)} style={styles.editButton}>
+      <TouchableOpacity onPress={() => handleEdit(review)} style={styles.editButton}>
         <Text style={styles.actionText}>수정</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.deleteButton}>
+      <TouchableOpacity onPress={() => handleDelete(review.id)} style={styles.deleteButton}>
         <Text style={styles.actionText}>삭제</Text>
       </TouchableOpacity>
     </View>
@@ -76,7 +77,7 @@ const MyReviewScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}> 내가 작성한 리뷰</Text>
+      <Text style={styles.title}> 내가 작성한 리뷰 {reviewCount}</Text>
       <FlatList
         data={dummyGetMyReview}
         keyExtractor={(item) => item.id.toString()}
@@ -88,12 +89,6 @@ const MyReviewScreen = () => {
             <Text style={styles.reviewRestaurant}>{item.name}</Text>
             <Text style={styles.reviewRating}>★{item.rating}</Text>
             </View>
-            {/* <Text style={styles.reviewHashtags}>
-            {item.hashtags
-                .split(",")
-                .map(tag => `#${tag.trim()}`)
-                .join(" ")}
-            </Text> */}
             <Text style={styles.reviewText} numberOfLines={1} ellipsizeMode="tail">{item.message}</Text>
             </View>
             </Swipeable>
@@ -101,16 +96,13 @@ const MyReviewScreen = () => {
         )}
       />
 
-      {/* 리뷰 수정 모달 */}
       {modalVisible && (
         <ReviewModal
-        reviewId={selectedReview?.id}
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        onSubmit={handleReviewSubmit}
-        restaurantId={selectedReview.restaurantId}
-        initialReview={selectedReview} // 기존 리뷰 데이터 넘겨줌
-        isEditing={isEditing}
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+          onSubmit={handleReviewSubmit}
+          review={selectedReview}
+          mode={mode}
         />
       )}
     </View>

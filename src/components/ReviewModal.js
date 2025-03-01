@@ -1,56 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Modal, StyleSheet, FlatList, KeyboardAvoidingView, Platform, Keyboard, TouchableWithoutFeedback, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { postReview, updateReview, getReview } from '../services/api';
 
-const ReviewModal = ({ visible, onClose, onSubmit, restaurantId, reviewId }) => {
+const ReviewModal = ({ visible, onClose, onSubmit, review, mode }) => {
   const [reviewText, setReviewText] = useState('');
-  const [rating, setRating] = useState(0); // ⭐ 별점 상태 추가
-  const [hashtags, setHashtags] = useState([]); // 해시태그 상태
-  const [tagInput, setTagInput] = useState(''); // 해시태그 입력 상태
-  const [mode, setMode] = useState('create');
-  const [existingReview, setExistingReview] = useState(null); //기존 리뷰 저장  
-
-  const reviewDTO = {
-    restaurantId: restaurantId,
-    message: reviewText,
-    rating: rating,
-    hashtags: hashtags,
-  };
+  const [rating, setRating] = useState(0);
+  const [hashtags, setHashtags] = useState([]);
+  const [tagInput, setTagInput] = useState('');
 
   useEffect(() => {
-    setReviewText('');
-    setRating(0);
-    setHashtags([]);
-    setMode('create');
-  
-    if (reviewId) {
-      setMode('edit');
-      getReview(reviewId)
-        .then((review) => {
-          setExistingReview(review);
-          setReviewText(review.message);
-          setRating(review.rating);
-          setHashtags(review.hashtags);
-        })
-        .catch((error) => console.error('리뷰 조회 실패:', error));
-    }
-  }, [reviewId]);
-
-  const handleSubmit = async () => {
-    try {
-      if (mode === 'create') {
-        await postReview(reviewDTO);
-      } else if (mode === 'edit') {
-        await updateReview(reviewId, reviewDTO);
-      }
-      onSubmit(reviewText);
+    if ((mode === 'view' || mode === 'edit') && review) {
+      setReviewText(review.message);
+      setRating(review.rating);
+      setHashtags(review.hashtags ? review.hashtags.split(', ') : []);
+    } else {
       setReviewText('');
       setRating(0);
       setHashtags([]);
-    } catch (error) {
-      console.error('리뷰 등록/수정 실패:', error);
     }
+  }, [review, mode]);
+
+  const handleSubmit = () => {
+      onSubmit({
+        message: reviewText,
+        rating,
+        hashtags: hashtags.join(', '),  // 배열을 쉼표로 구분된 문자열로 변환
+      });
+      onClose();
   };
 
   const renderTitle = () => {
@@ -80,9 +56,8 @@ const ReviewModal = ({ visible, onClose, onSubmit, restaurantId, reviewId }) => 
   };
   
 
-  // ⭐ 별점 선택 함수
   const selectRating = (star) => {
-    setRating(star);
+      setRating(star);
   };
 
   const addHashtag = () => {
@@ -93,7 +68,7 @@ const ReviewModal = ({ visible, onClose, onSubmit, restaurantId, reviewId }) => 
   };
 
   const removeHashtag = (tag) => {
-    setHashtags(hashtags.filter((t) => t !== tag));
+      setHashtags(hashtags.filter((t) => t !== tag));
   };
 
 
@@ -149,7 +124,7 @@ const ReviewModal = ({ visible, onClose, onSubmit, restaurantId, reviewId }) => 
             <Text style={[styles.addTagText, mode === 'view' && { color: '#ccc' }]}>+</Text>
           </TouchableOpacity>
         </View>
-
+        
         {/* 해시태그 리스트 */}
         <FlatList
           data={hashtags}

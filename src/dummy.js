@@ -189,8 +189,8 @@ export const dummyGetMyReview = [
   {
     id: 4,
     name: "닭칼국수",
-    rating: 4,
-    message: "여기 진짜 맛도리감자탕인데 나만 오기는 아쉽고 해서 소개드리는데 잔짜 쌀국수 맛있어요",
+    rating: 3,
+    message: "닭칼국수 냐미!!",
     createdAt: "2024-09-21-00:35",
     updatedAt: "2024-09-29-00:36", //리뷰 마지막 수정 날짜
     hashtags: "칼국수, 한식",

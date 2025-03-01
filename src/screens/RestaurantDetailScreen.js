@@ -1,97 +1,65 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Image, TouchableOpacity, FlatList, Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, Alert, error } from 'react-native';
 import { getRestaurantById } from '../services/api';
-import { getReview } from '../services/api';
+import { postReview, getReview } from '../services/api';
 import ReviewModal from '../components/ReviewModal';
 
 import { dummyRestaurantDetail } from '../dummy';
 
 const RestaurantDetail = ({route}) => {
-  const [restaurant, setRestaurant] = useState(null);
-  const [reviews, setReviews] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false); // 모달 상태 추가
-
   const { restaurantId } = route.params;
 
-  const flatListRef = useRef(null);
+  const [restaurant, setRestaurant] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
 
+  const flatListRef = useRef(null);
   const scrollToReviews = () => {
     if (flatListRef.current) {
       flatListRef.current.scrollToIndex({ index: 0, animated: true });
     }
   };
 
-  const submitReview = () => {
-    Alert.alert("리뷰 등록 완료!");
-    console.log(`리뷰 등록 완료! 식당 ID: ${restaurantId}`);
-    setModalVisible(false); // 모달 닫기
-  };
+  // useEffect(() => {
+  //   const fetchRestaurantDetails = () => {
+  //     try {
+  //     // 레스토랑 정보 가져오기
+  //     const foundRestaurant = dummyRestaurantDetail.find(
+  //       (item) => item.id === restaurantId
+  //     );
+
+  //     if (foundRestaurant) {
+  //       setRestaurant(foundRestaurant);
+  //       setReviews(foundRestaurant.reviews || []); // reviews가 없으면 빈 배열로 설정
+  //       } else {
+  //         console.error('식당 정보를 찾을 수 없습니다.', error);
+  //       }
+  //     } catch (err) {
+  //       console.error('식당 정보를 가져오는 데 실패했습니다.', error);
+  //     } 
+  //   };
+
+  //   fetchRestaurantDetails();
+  // }, [restaurantId]);
 
 
   useEffect(() => {
-    const fetchRestaurantDetails = () => {
+    const fetchRestaurantDetails = async() => {
       try {
-        setLoading(true);
       // 레스토랑 정보 가져오기
-      const foundRestaurant = dummyRestaurantDetail.find(
-        (item) => item.id === restaurantId
-      );
+      const responseRestaurant = await getRestaurantById(restaurantId);
+      setRestaurant(responseRestaurant);
+      const responseReview = await getReview(restaurantId);
+      setReviews(responseReview);
 
-      if (foundRestaurant) {
-        setRestaurant(foundRestaurant);
-        // 해당 레스토랑에 대한 리뷰 설정
-        setReviews(foundRestaurant.reviews || []); // reviews가 없으면 빈 배열로 설정
-        } else {
-          setError('식당 정보를 찾을 수 없습니다.');
-        }
-      } catch (err) {
-        setError('식당 정보를 가져오는 데 실패했습니다.');
-      } finally {
-        setLoading(false);
-      }
+      } catch (error) {
+        console.error('식당 정보를 가져오는 데 실패했습니다.', error);
+      } 
     };
 
     fetchRestaurantDetails();
   }, [restaurantId]);
 
-  
-
-//   useEffect(() => {
-//     const fetchRestaurantDetails = async () => {
-//       try {
-//         setLoading(true);
-//         const responseId = await getRestaurantById();  // API 호출
-//         setRestaurant(responseId);  // 받은 데이터 설정
-//          const responseReview = await getReview();
-//          setReview(responseReview);
-//       } catch (err) {
-//         setError('식당 정보를 가져오는 데 실패했습니다.');
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchRestaurantDetails();
-//   }, []);
-
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" />
-        <Text>데이터를 불러오는 중...</Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.center}>
-        <Text>{error}</Text>
-      </View>
-    );
-  }
 
   if (!restaurant) {
     return (
@@ -133,8 +101,20 @@ const RestaurantDetail = ({route}) => {
           <ReviewModal
             visible={modalVisible}
             onClose={() => setModalVisible(false)}
-            onSubmit={submitReview}
-            restaurantId={restaurantId}
+            onSubmit={async (reviewDTO) => {
+              try {
+                await postReview(restaurantId, reviewDTO);
+                Alert.alert("리뷰 등록 완료!");
+                // 해당 레스토랑 최신 리뷰 목록 불러오기 
+                const updatedRestaurant = await getReview(restaurantId);
+                setReviews(updatedRestaurant || []); // 서버에서 받은 최신 리뷰 목록 반영
+              } catch (error) {
+                Alert.alert("리뷰 등록 실패", error.message);
+              }
+              setModalVisible(false);
+            }}
+            review={null}
+            mode="create"
           />
 
           <TouchableOpacity style={styles.showReview} onPress={scrollToReviews}>

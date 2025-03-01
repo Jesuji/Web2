@@ -51,7 +51,7 @@ function ProfileScreen({ navigation }) {
       </View>
 
       {/* 최근 작성한 리뷰 */}
-      <TouchableOpacity style={styles.reviewSection}  onPress={()=> navigation.navigate('MyReview')}>
+      <TouchableOpacity style={styles.reviewSection}  onPress={()=> navigation.navigate('MyReview', { reviewCount: profile?.reviewCount })}>
           <Text style={styles.reviewTitle}>
             최근 작성한 리뷰 {profile?.reviewCount}</Text>
       </TouchableOpacity>

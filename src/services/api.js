@@ -41,13 +41,21 @@ const getRestaurants = () => api.get('/restaurants');
 
 const searchRestaurants = (query) => api.get(`/restaurants/search?keyword=${query}`);
 
-const getRestaurantById = (id) => api.get(`/restaurants/${id}`);
+const getRestaurantById = (restaurantId) => api.get(`/restaurants/${restaurantId}`);
 
 // ✍️ 리뷰 관련 API
-//리뷰 조회
-const getReview = (id) => api.get(`/restaurants/${id}/reviews`);
+//내 리뷰목록 조회
+const getMyReview = () => api.get('/my-reviews');
+//레스토랑 리뷰 조회
+const getReview = (restaurantId) => api.get(`/restaurants/${restaurantId}/reviews`);
 //리뷰 작성
 const postReview = (restaurantId, reviewDTO) => api.post(`/reviews/new?${restaurantId}`, reviewDTO);
+//리뷰 수정
+const editReview = (reviewId, reviewDTO) => api.patch(`/reviews/update/${reviewId}`, reviewDTO);
+//리뷰 삭제
+const deleteReview = (reviewId) => api.post(`/reviews/delete/${reviewId}`);
+
+
 
 
 export { 
@@ -61,4 +69,7 @@ export {
   getRestaurantById,
   getReview,
   postReview,
+  getMyReview,
+  editReview,
+  deleteReview
 };
