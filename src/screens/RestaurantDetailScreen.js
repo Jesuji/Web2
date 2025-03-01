@@ -4,7 +4,7 @@ import { getRestaurantById } from '../services/api';
 import { postReview, getReview } from '../services/api';
 import ReviewModal from '../components/ReviewModal';
 
-import { dummyRestaurantDetail } from '../dummy';
+//import { dummyRestaurantDetail } from '../dummy';
 
 const RestaurantDetail = ({route}) => {
   const { restaurantId } = route.params;
@@ -15,10 +15,16 @@ const RestaurantDetail = ({route}) => {
 
   const flatListRef = useRef(null);
   const scrollToReviews = () => {
-    if (flatListRef.current) {
+    if (flatListRef.current && flatListRef.current.props.data && flatListRef.current.props.data.length > 0) {
       flatListRef.current.scrollToIndex({ index: 0, animated: true });
     }
   };
+
+  useEffect(() => {
+    if (reviews.length > 0) {
+      scrollToReviews(); // 리뷰가 업데이트된 후 스크롤
+    }
+  }, [reviews]);
 
   // useEffect(() => {
   //   const fetchRestaurantDetails = () => {
@@ -42,15 +48,15 @@ const RestaurantDetail = ({route}) => {
   //   fetchRestaurantDetails();
   // }, [restaurantId]);
 
-
+  
   useEffect(() => {
     const fetchRestaurantDetails = async() => {
       try {
       // 레스토랑 정보 가져오기
       const responseRestaurant = await getRestaurantById(restaurantId);
-      setRestaurant(responseRestaurant);
+      setRestaurant(responseRestaurant.data);
       const responseReview = await getReview(restaurantId);
-      setReviews(responseReview);
+      setReviews(responseReview || []);
 
       } catch (error) {
         console.error('식당 정보를 가져오는 데 실패했습니다.', error);
@@ -85,7 +91,7 @@ const RestaurantDetail = ({route}) => {
       keyExtractor={(item, index) => index.toString()}
       ListHeaderComponent={
         <View style={styles.container}>
-          <Image source={{ uri: restaurant.imageUrl }} style={styles.restaurantImage} />
+          <Image source={{ uri: restaurant.imageUrl }} style={styles.restaurantImage} resizeMode='cover'/>
           <Text style={styles.address}>📍 {restaurant.address}</Text>
           <Text style={styles.weekdays}>📍 평일 운영시간: {restaurant.weekdays}</Text>
           <Text style={styles.weekend}>📍 주말 운영시간: {restaurant.weekend}</Text>
@@ -107,11 +113,13 @@ const RestaurantDetail = ({route}) => {
                 Alert.alert("리뷰 등록 완료!");
                 // 해당 레스토랑 최신 리뷰 목록 불러오기 
                 const updatedRestaurant = await getReview(restaurantId);
+                console.log('업데이트된 리뷰',updatedRestaurant);
                 setReviews(updatedRestaurant || []); // 서버에서 받은 최신 리뷰 목록 반영
               } catch (error) {
                 Alert.alert("리뷰 등록 실패", error.message);
               }
               setModalVisible(false);
+              scrollToReviews();
             }}
             review={null}
             mode="create"

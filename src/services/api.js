@@ -31,11 +31,7 @@ const postSignOut = () => api.post('/auth/logout');
 const getMyProfile = () => api.get('/my-profile');
 
 // 🍽️ 레스토랑 관련 API
-const postMyLocation = (latitude, longitude, radius) => {
-  return api.post('/restaurants/search/location', {
-    params: { latitude, longitude, radius }
-  });
-};
+const postMyLocation = (latitude, longitude, radius) => api.post('/restaurants/search/location', { latitude, longitude, radius });
 
 const getRestaurants = () => api.get('/restaurants');
 
@@ -49,11 +45,25 @@ const getMyReview = () => api.get('/my-reviews');
 //레스토랑 리뷰 조회
 const getReview = (restaurantId) => api.get(`/restaurants/${restaurantId}/reviews`);
 //리뷰 작성
-const postReview = (restaurantId, reviewDTO) => api.post(`/reviews/new?${restaurantId}`, reviewDTO);
+const postReview = async (restaurantId, reviewDTO) => {
+  try {
+    const formData = new FormData();
+    formData.append('reviewDTO', JSON.stringify(reviewDTO));
+
+    // POST 요청 보내기
+    const response = await api.post(`/reviews/new?restaurantId=${restaurantId}`, formData);
+
+    return response; // 응답 반환
+  } catch (error) {
+    console.error("❌ 리뷰 등록 실패:", error.response?.data || error.message);
+    throw error; // 오류 처리
+  }
+};
+
 //리뷰 수정
-const editReview = (reviewId, reviewDTO) => api.patch(`/reviews/update/${reviewId}`, reviewDTO);
+const updateReview = (reviewId, updateDTO) => api.patch(`/reviews/update?reviewId=${reviewId}`, updateDTO);
 //리뷰 삭제
-const deleteReview = (reviewId) => api.post(`/reviews/delete/${reviewId}`);
+const deleteReview = (reviewId) => api.delete(`/reviews/delete/${reviewId}`);
 
 
 
@@ -70,6 +80,6 @@ export {
   getReview,
   postReview,
   getMyReview,
-  editReview,
+  updateReview,
   deleteReview
 };

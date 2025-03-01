@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import ReviewModal from '../components/ReviewModal';
-import { getMyReview, getReview, editReview, deleteReview } from '../services/api';
+import { getMyReview, updateReview, deleteReview } from '../services/api';
 import { dummyGetMyReview } from '../dummy';
 
 const MyReviewScreen = ({route}) => {
@@ -41,9 +41,18 @@ const MyReviewScreen = ({route}) => {
   };
 
   // 수정 완료 후 처리
-  const handleReviewSubmit = (updatedReview) => {
-    setReviews(reviews.map((r) => (r.id === updatedReview.id ? updatedReview : r)));
-    setModalVisible(false);
+  const handleReviewSubmit = async (reviewId, updateDTO) => {
+    try {
+      console.log('업데이트 요청:', reviewId, updateDTO); //ok
+      const response = await updateReview(reviewId, updateDTO);
+      console.log('서버 응답:', response);//안됨
+      setReviews((prevReviews) =>
+        prevReviews.map((r) => (r.id === reviewId ? response : r))
+      );
+      setModalVisible(false);
+    } catch (error) {
+      console.error('리뷰 수정 실패:', error);
+    }
   };
 
   // 리뷰 삭제
@@ -55,7 +64,7 @@ const MyReviewScreen = ({route}) => {
         onPress: async () => {
           try {
             await deleteReview(reviewId);
-            setReviews(reviews.filter((review) => review.id !== reviewId));
+            setReviews((prevReviews) => prevReviews.filter((review) => review.id !== reviewId));
           } catch (error) {
             console.error("리뷰 삭제 실패:", error);
           }
@@ -79,7 +88,7 @@ const MyReviewScreen = ({route}) => {
     <View style={styles.container}>
       <Text style={styles.title}> 내가 작성한 리뷰 {reviewCount}</Text>
       <FlatList
-        data={dummyGetMyReview}
+        data={reviews.data}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
         <TouchableOpacity onPress={() => handleView(item)}>

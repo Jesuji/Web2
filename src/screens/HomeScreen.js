@@ -8,7 +8,7 @@ import { postMyLocation, searchRestaurants } from '../services/api';
 
 import Header from '../components/Header';
 
-import { dummyRestaurants} from '../dummy';
+//import { dummyRestaurants} from '../dummy';
 
 
 const HomeScreen = () => {
@@ -26,8 +26,8 @@ const HomeScreen = () => {
   const geoLocation = () => {
     Geolocation.getCurrentPosition(
       (position) => {
-        const lat = 37.4979;  // 강남역 위도
-        const lon = 127.0276;  // 강남역 경도
+        const lat = 35.479378341721;
+        const lon = 128.75233566843;
 
         setLatitude(lat);
         setLongitude(lon);
@@ -135,7 +135,7 @@ const HomeScreen = () => {
             </View>
 
             <FlatList
-              data={dummyRestaurants}
+              data={restaurants}
               renderItem={({ item }) => <RestaurantItem item={item} />}
               keyExtractor={(item) => item.id.toString()}
             />
