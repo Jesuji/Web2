@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, Alert, error } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { getRestaurantById } from '../services/api';
 import { postReview, getReview } from '../services/api';
 import ReviewModal from '../components/ReviewModal';
@@ -111,10 +111,11 @@ const RestaurantDetail = ({route}) => {
               try {
                 await postReview(restaurantId, reviewDTO);
                 Alert.alert("리뷰 등록 완료!");
-                // 해당 레스토랑 최신 리뷰 목록 불러오기 
-                const updatedRestaurant = await getReview(restaurantId);
-                console.log('업데이트된 리뷰',updatedRestaurant);
-                setReviews(updatedRestaurant || []); // 서버에서 받은 최신 리뷰 목록 반영
+                // 해당 레스토랑 최신 리뷰 목록 불러오기 (지연방지)
+                setTimeout(async () => {
+                  const updatedReviews = await getReview(restaurantId);
+                  setReviews(updatedReviews || []);
+                }, 500);
               } catch (error) {
                 Alert.alert("리뷰 등록 실패", error.message);
               }

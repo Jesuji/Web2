@@ -20,9 +20,18 @@ const HomeScreen = () => {
   const [isSearching, setIsSearching] = useState(false);
 
   const location = latitude && longitude ? { latitude, longitude, latitudeDelta: 0.045, longitudeDelta: 0.045 } : null;
-
-
   console.log(location);
+
+  useEffect(() => {
+    const getLocation = async () => {
+      await geoLocation();
+    };
+
+    getLocation();
+
+  }, []); // 의존성 배열을 빈 배열로 두어 한 번만 호출되게
+
+
   const geoLocation = () => {
     Geolocation.getCurrentPosition(
       (position) => {
@@ -39,6 +48,19 @@ const HomeScreen = () => {
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 },
     );
   };
+
+  useEffect(() => {
+    if (latitude !== null && longitude !== null) {
+      const newRegion = {
+        latitude,
+        longitude,
+        latitudeDelta: 0.045,
+        longitudeDelta: 0.045,
+      };
+      setRegion(newRegion);  // 위치가 바뀌면 region 업데이트
+    }
+  }, [latitude, longitude]);
+
 
    // 레스토랑 정보 받아오기
    const getRestaurants = (lat, lon) => {
@@ -74,19 +96,6 @@ const HomeScreen = () => {
     }
   };
 
-
-
-  useEffect(() => {
-    if (latitude && longitude) {
-      const newRegion = {
-        latitude,
-        longitude,
-        latitudeDelta: 0.045,
-        longitudeDelta: 0.045,
-      };
-      setRegion(newRegion);  // 위치가 바뀌면 region 업데이트
-    }
-  }, [latitude, longitude]);
 
 
   return (

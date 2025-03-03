@@ -55,7 +55,7 @@ const postReview = async (restaurantId, reviewDTO) => {
 
     return response; // 응답 반환
   } catch (error) {
-    console.error("❌ 리뷰 등록 실패:", error.response?.data || error.message);
+    console.error("리뷰 등록 실패:", error.response?.data || error.message);
     throw error; // 오류 처리
   }
 };

@@ -1,6 +1,5 @@
 import 'react-native-gesture-handler';
 import React from 'react';
-import { View, Text } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { UserProvider } from './contexts/UserContext';
@@ -19,7 +18,7 @@ const App = () => {
   return (
     <UserProvider>
       <NavigationContainer>
-      <Stack.Navigator initialRouteName="SignIn">
+      <Stack.Navigator initialRouteName="Home">
 
       <Stack.Screen 
       name='SignUp' 
