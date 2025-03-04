@@ -66,6 +66,7 @@ const SignInScreen = () => {
             value={password}
             onChangeText={setPassword}
             secureTextEntry
+            autoCapitalize="none"
           />
   
           

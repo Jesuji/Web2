@@ -5,6 +5,7 @@ import RestaurantItem from '../components/RestaurantItem';
 import Geolocation from '@react-native-community/geolocation';
 import MapView, { Marker } from 'react-native-maps';
 import { postMyLocation, searchRestaurants } from '../services/api';
+import { useNavigation } from '@react-navigation/native';
 
 import Header from '../components/Header';
 
@@ -12,24 +13,16 @@ import Header from '../components/Header';
 
 
 const HomeScreen = () => {
+  const nav = useNavigation();
+
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
   const [region, setRegion] = useState(null);
+  // const [location, setLocation] = useState(null);
   const [restaurants, setRestaurants] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-
-  const location = latitude && longitude ? { latitude, longitude, latitudeDelta: 0.045, longitudeDelta: 0.045 } : null;
-  console.log(location);
-
-  useEffect(() => {
-    const getLocation = async () => {
-      await geoLocation();
-    };
-
-    getLocation();
-
-  }, []); // 의존성 배열을 빈 배열로 두어 한 번만 호출되게
+  const [searchedRestaurants, setSearchedRestaurants] = useState([]);
 
 
   const geoLocation = () => {
@@ -40,6 +33,12 @@ const HomeScreen = () => {
 
         setLatitude(lat);
         setLongitude(lon);
+        setRegion({
+          latitude: lat,
+          longitude: lon,
+          latitudeDelta: 0.045,
+          longitudeDelta: 0.045,
+        });
         getRestaurants(lat, lon);
       },
       (error) => {
@@ -48,6 +47,10 @@ const HomeScreen = () => {
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 },
     );
   };
+
+  useEffect(() => {
+    geoLocation(); // 처음 로딩 시 내 위치를 가져오기
+  }, []);
 
   useEffect(() => {
     if (latitude !== null && longitude !== null) {
@@ -64,9 +67,9 @@ const HomeScreen = () => {
 
    // 레스토랑 정보 받아오기
    const getRestaurants = (lat, lon) => {
-    postMyLocation(lat, lon, 5)  // 5km 범위 레스토랑 가져오기
+    postMyLocation(lat, lon, 5)
       .then((response) => {
-        setRestaurants(response.data);  // 받아온 레스토랑 데이터 상태에 저장
+        setRestaurants(response.data);
       })
       .catch((error) => {
         console.error(error);
@@ -74,25 +77,21 @@ const HomeScreen = () => {
   };
 
 
-  // 검색어 필터링
-  const filteredRestaurants = restaurants.filter((restaurant) => {
-    return restaurant.name.toLowerCase().includes(searchQuery.toLowerCase());
-  });
-
-  // 검색어 상태가 변할 때 검색 모드 활성화
+  // 검색 함수
   const handleSearch = (query) => {
     setSearchQuery(query);
     if (query.length > 0) {
-      setIsSearching(true);  // 검색어가 있으면 검색 모드로 전환
-      searchRestaurants(query)  // searchRestaurants 호출
+      setIsSearching(true);
+      searchRestaurants(query)
         .then((response) => {
-          setRestaurants(response.data);  // 받아온 검색된 레스토랑 데이터 저장
+          setSearchedRestaurants(response.data);
         })
         .catch((error) => {
           console.error(error);
         });
     } else {
-      setIsSearching(false);  // 검색어가 없으면 기본 화면
+      setIsSearching(false);
+      setSearchedRestaurants([]);
     }
   };
 
@@ -108,17 +107,17 @@ const HomeScreen = () => {
           onChange={handleSearch}
         />
 
-      
 
       {isSearching ? (
           <>
         <Text style={styles.searchingText}></Text>
-        
-        {filteredRestaurants.length === 0 ? (
+
+        {searchedRestaurants.length === 0 ? (
           <Text style={styles.noResultsText}>검색 결과가 없습니다.</Text>
         ) : (
+          //검색된 데이터
           <FlatList
-            data={filteredRestaurants}
+            data={searchedRestaurants}
             renderItem={({ item }) => <RestaurantItem item={item} />}
             keyExtractor={(item) => item.id.toString()}
           />
@@ -127,17 +126,39 @@ const HomeScreen = () => {
         ) : (
           <>
             <View style={styles.mapContainer}>
-              <MapView style={styles.map} region={region} onRegionChangeComplete={(region) => {
-                setLatitude(region.latitude);
-                setLongitude(region.longitude);
-              }}>
-                <Marker coordinate={region} title="내 위치" />
+              <MapView
+              style={styles.map}
+              region={region}
+              onRegionChangeComplete={(newRegion) => {
+                setRegion(newRegion);
+              }}
+              // onPress={(e) => {
+              //   const { latitude, longitude } = e.nativeEvent.coordinate; // 클릭한 위치 받아오기
+              //   setLocation({ latitude, longitude }); // 클릭한 위치로 마커 이동
+              // }}
+              >
+                {latitude && longitude && (
+                  <Marker
+                    coordinate={{ latitude, longitude }}
+                    title="내위치"
+                    pinColor="red"
+                  />
+                )}
+
+                {/* {location && (
+                  <Marker
+                    coordinate={location}
+                    title="위치" // 마커 이름을 "위치"로 설정
+                    pinColor="blue"
+                  />
+                )} */}
 
                 {restaurants.map((restaurant) => (
                   <Marker
                     key={restaurant.id}
                     coordinate={{ latitude: restaurant.latitude, longitude: restaurant.longitude }}
                     title={restaurant.name}
+                    onPress={() => nav.navigate('RestaurantDetail', { restaurant })}
                   />
                 ))}
               </MapView>

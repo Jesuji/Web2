@@ -5,6 +5,11 @@ import { useNavigation } from '@react-navigation/native';
 const Header = () => {
   const nav = useNavigation();
 
+  const refreshPage = () => {
+    nav.navigate("Home", {
+    });
+  };
+
   return (
     <View style={styles.header}>
       {/* 채팅 버튼 */}
@@ -14,7 +19,7 @@ const Header = () => {
       </TouchableOpacity>
 
       {/* 홈 버튼 */}
-      <TouchableOpacity style={styles.headerItem}  >
+      <TouchableOpacity style={styles.headerItem} onPress={refreshPage}>
         <Image source={require('../../assets/images/homeicon.png')} style={styles.headerIcon} />
       </TouchableOpacity>
 
