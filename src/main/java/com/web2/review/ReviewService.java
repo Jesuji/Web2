@@ -7,6 +7,7 @@ import com.web2.restaurant.RestaurantService;
 import com.web2.review.dto.ReviewDTO;
 import com.web2.review.dto.ReviewResponseDTO;
 import com.web2.review.dto.ReviewUpdateDTO;
+import com.web2.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -59,16 +60,18 @@ public class ReviewService {
 
     //리뷰 수정 메서드
     public Review updateReview(ReviewUpdateDTO updateDTO,
-                               Long id,
-                               String newimageUrl) {
+                               Long reviewId
+                               /*String newImageUrl*/) {
+
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("리뷰를 찾을수 없습니다."));
+
         String message = updateDTO.message();
         int rating = updateDTO.rating();
         String hashtags = updateDTO.hashtags();
 
-        Review review = reviewRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("리뷰를 찾을수 없습니다."));
         //새로운 이미지가 있으면 기존 이미지를 삭제
-        if(newimageUrl != null && !newimageUrl.isEmpty()) {
+        /*if(newImageUrl != null && !newImageUrl.isEmpty()) {
             String oldImageUrl = review.getImageUrl(); //수정되기 전 원래 리뷰 사진
 
         //기존 이미지가 있는 경우 S3에서 삭제
@@ -76,8 +79,8 @@ public class ReviewService {
                 s3Service.deleteFileFromS3Bucket(oldImageUrl);
             }
             //새로운 이미지 URL 설정
-            review.setImageUrl(newimageUrl);
-        }
+            review.setImageUrl(newImageUrl);
+        }*/
 
         review.setMessage(message);
         review.setRating(rating);

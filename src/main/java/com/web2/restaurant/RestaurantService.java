@@ -113,7 +113,6 @@ public class RestaurantService {
                     //검색할 때도 사진 추가해야 됨
                     String photoReference = googlePlacesService.getPhotoReference(restaurant.getName(), restaurant.getAddress());
                     String photoUrl = photoReference != null ? googlePlacesService.getPhotoUrl(photoReference) : null;
-
                     String imageUrl = null; // S3에 업로드하고 URL 반환
                     try {
                         imageUrl = photoUrl != null ? s3Service.uploadFileFromUrl(photoUrl) : null;

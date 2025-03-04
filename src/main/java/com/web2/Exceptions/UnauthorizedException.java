@@ -1,4 +1,4 @@
-package com.web2.global.exception;
+package com.web2.Exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

@@ -16,9 +16,15 @@ import org.springframework.web.socket.server.support.HttpSessionHandshakeInterce
 
 public class WebSocketConfig implements WebSocketConfigurer {
 
+    private final ChatWebSocketHandler chatWebSocketHandler;
+
+    public WebSocketConfig(ChatWebSocketHandler chatWebSocketHandler) {
+        this.chatWebSocketHandler = chatWebSocketHandler;
+    }
+
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(new ChatWebSocketHandler(), "/ws/chat")
+        registry.addHandler(chatWebSocketHandler, "/ws/chat")
                 .addInterceptors(new HttpSessionHandshakeInterceptor())  // HttpSession에서 WebSocketSession으로 전달
                 .setAllowedOrigins("*");
     }

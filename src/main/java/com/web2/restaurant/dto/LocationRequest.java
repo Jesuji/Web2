@@ -6,11 +6,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class LocationRequest {
-    private Double latitude;
-    private Double longitude;
-    private Double radius;
+    private double latitude;
+    private double longitude;
+    private double radius;
 
-    public LocationRequest(Double latitude, Double longitude, Double radius) {
+    public LocationRequest(double latitude, double longitude, double radius) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.radius = radius;
