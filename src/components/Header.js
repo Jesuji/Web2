@@ -13,7 +13,7 @@ const Header = () => {
   return (
     <View style={styles.header}>
       {/* 채팅 버튼 */}
-      <TouchableOpacity style={styles.headerItem}  >
+      <TouchableOpacity style={styles.headerItem} onPress={() => nav.navigate('ChatList')} >
         <Image source={require('../../assets/images/chaticon.png')} style={styles.headerIcon} />
         <Text style={styles.headerText}>채팅</Text>
       </TouchableOpacity>

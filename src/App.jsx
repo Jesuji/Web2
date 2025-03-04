@@ -3,6 +3,7 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { UserProvider } from './contexts/UserContext';
+import { TransitionPresets } from '@react-navigation/stack';
 
 import SignUpScreen from './screens/SignUpScreen';
 import SignInScreen from './screens/SignInScreen';
@@ -10,6 +11,7 @@ import HomeScreen from './screens/HomeScreen';
 import RestaurantDetailScreen from './screens/RestaurantDetailScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import MyReviewScreen from './screens/MyReviewScreen';
+import ChatListScreen from './screens/ChatListScreen';
 
 
 const Stack = createStackNavigator();
@@ -60,6 +62,16 @@ const App = () => {
         options={{
           title: '내 리뷰',
           headerBackTitle: '',
+        }}
+      />
+      <Stack.Screen
+        name='ChatList'
+        component={ChatListScreen}
+        options={{
+          title: '채팅목록',
+          headerBackTitle: '',
+          ...TransitionPresets.SlideFromLeftIOS,
+
         }}
       />
 

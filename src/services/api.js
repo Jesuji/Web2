@@ -66,6 +66,12 @@ const updateReview = (reviewId, updateDTO) => api.patch(`/reviews/update?reviewI
 const deleteReview = (reviewId) => api.delete(`/reviews/delete/${reviewId}`);
 
 
+//채팅
+const getChatList = () => api.get('/users');
+const getChatmessage = (senderNickname, recipientNickname) => api.get('/messages',{senderNickname, recipientNickname});
+const postChatmessage = (senderNickname, recipientNickname, content) => api.post('/messages', {senderNickname, recipientNickname, content});
+
+
 
 
 export { 
@@ -81,5 +87,8 @@ export {
   postReview,
   getMyReview,
   updateReview,
-  deleteReview
+  deleteReview,
+  getChatList,
+  getChatmessage,
+  postChatmessage
 };
