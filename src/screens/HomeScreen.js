@@ -108,7 +108,7 @@ const HomeScreen = () => {
 
         {isSearching ? (
           <View style={styles.searchbg}>
-          <Image source={require('../../assets/images/searchbg.png')}/>
+          <Image source={require('../../assets/images/searchbg.png')} style={styles.searchbgimg} resizeMode="contain"/>
           <Text style={styles.noResultsText}>그리운 고향 메뉴를 검색해보세요</Text>
           </View>
         ) : searchedRestaurants.length > 0 ? (
@@ -118,7 +118,10 @@ const HomeScreen = () => {
             keyExtractor={(item) => (item.id ? item.id.toString() : item.name)}
           />
         ) : searchQuery.length > 0 ? (
+          <View style={styles.searchbg}>
+          <Image source={require('../../assets/images/error.png')} style={styles.searchbgimg} resizeMode="contain"/>
           <Text style={styles.noResultsText}>검색 결과가 없습니다.</Text>
+          </View>
         ) : null}
 
         {!isSearching && searchedRestaurants.length === 0 && (
@@ -136,7 +139,7 @@ const HomeScreen = () => {
                   coordinate={{ latitude, longitude }}
                   title="내 위치"
                   pinColor="red"
-                />
+                  />
               )}
 
               {restaurants.map((restaurant) => (
@@ -145,8 +148,9 @@ const HomeScreen = () => {
                   coordinate={{ latitude: restaurant.latitude, longitude: restaurant.longitude }}
                   title={restaurant.name}
                   onPress={() => nav.navigate('RestaurantDetail', { restaurantId: restaurant.id })}
-                  pinColor="yellow"
-                />
+                >
+                  <Image source={require('../../assets/images/guideMarker.png')} style={{ width: 50, height: 50 }} />
+                </Marker>
               ))}
             </MapView>
           </View>
@@ -176,6 +180,10 @@ const styles = StyleSheet.create({
       marginTop: 50,
       justifyContent: 'center',
       alignItems: 'center',
+    },
+    searchbgimg: {
+      width: '100%',
+      height: 70,
     },
     noResultsText: {
       flex: 1,
