@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, FlatList, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, StyleSheet } from 'react-native';
+import { View, Text, Button, FlatList, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, StyleSheet, Image } from 'react-native';
 import SearchBar from '../components/SearchBar';
 import RestaurantItem from '../components/RestaurantItem';
 import Geolocation from '@react-native-community/geolocation';
@@ -8,8 +8,6 @@ import { postMyLocation, searchRestaurants } from '../services/api';
 import { useNavigation } from '@react-navigation/native';
 
 import Header from '../components/Header';
-
-//import { dummyRestaurants} from '../dummy';
 
 
 const HomeScreen = () => {
@@ -49,7 +47,7 @@ const HomeScreen = () => {
   };
 
   useEffect(() => {
-    geoLocation(); // 처음 로딩 시 내 위치를 가져오기
+    geoLocation();
   }, []);
 
   useEffect(() => {
@@ -108,71 +106,59 @@ const HomeScreen = () => {
         />
 
 
-      {isSearching ? (
-          <>
-        <Text style={styles.searchingText}></Text>
-
-        {searchedRestaurants.length === 0 ? (
-          <Text style={styles.noResultsText}>검색 결과가 없습니다.</Text>
-        ) : (
-          //검색된 데이터
+        {isSearching ? (
+          <View style={styles.searchbg}>
+          <Image source={require('../../assets/images/searchbg.png')}/>
+          <Text style={styles.noResultsText}>그리운 고향 메뉴를 검색해보세요</Text>
+          </View>
+        ) : searchedRestaurants.length > 0 ? (
           <FlatList
             data={searchedRestaurants}
             renderItem={({ item }) => <RestaurantItem item={item} />}
-            keyExtractor={(item) => item.id.toString()}
+            keyExtractor={(item) => (item.id ? item.id.toString() : item.name)}
           />
-        )}
-      </>
-        ) : (
-          <>
-            <View style={styles.mapContainer}>
-              <MapView
+        ) : searchQuery.length > 0 ? (
+          <Text style={styles.noResultsText}>검색 결과가 없습니다.</Text>
+        ) : null}
+
+        {!isSearching && searchedRestaurants.length === 0 && (
+        <>
+          <View style={styles.mapContainer}>
+            <MapView
               style={styles.map}
               region={region}
               onRegionChangeComplete={(newRegion) => {
                 setRegion(newRegion);
               }}
-              // onPress={(e) => {
-              //   const { latitude, longitude } = e.nativeEvent.coordinate; // 클릭한 위치 받아오기
-              //   setLocation({ latitude, longitude }); // 클릭한 위치로 마커 이동
-              // }}
-              >
-                {latitude && longitude && (
-                  <Marker
-                    coordinate={{ latitude, longitude }}
-                    title="내위치"
-                    pinColor="red"
-                  />
-                )}
+            >
+              {latitude && longitude && (
+                <Marker
+                  coordinate={{ latitude, longitude }}
+                  title="내 위치"
+                  pinColor="red"
+                />
+              )}
 
-                {/* {location && (
-                  <Marker
-                    coordinate={location}
-                    title="위치" // 마커 이름을 "위치"로 설정
-                    pinColor="blue"
-                  />
-                )} */}
+              {restaurants.map((restaurant) => (
+                <Marker
+                  key={restaurant.id}
+                  coordinate={{ latitude: restaurant.latitude, longitude: restaurant.longitude }}
+                  title={restaurant.name}
+                  onPress={() => nav.navigate('RestaurantDetail', { restaurantId: restaurant.id })}
+                  pinColor="yellow"
+                />
+              ))}
+            </MapView>
+          </View>
 
-                {restaurants.map((restaurant) => (
-                  <Marker
-                    key={restaurant.id}
-                    coordinate={{ latitude: restaurant.latitude, longitude: restaurant.longitude }}
-                    title={restaurant.name}
-                    onPress={() => nav.navigate('RestaurantDetail', { restaurant })}
-                  />
-                ))}
-              </MapView>
-            </View>
-
-            <FlatList
-              data={restaurants}
-              renderItem={({ item }) => <RestaurantItem item={item} />}
-              keyExtractor={(item) => item.id.toString()}
-            />
-            <Button title="현재 위치로 보기" onPress={geoLocation} />
-          </>
-        )}
-
+          <FlatList
+            data={restaurants}
+            renderItem={({ item }) => <RestaurantItem item={item} />}
+            keyExtractor={(item) => item.id.toString()}
+          />
+          <Button title="현재 위치로 보기" onPress={geoLocation} />
+        </>
+      )}
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
 
@@ -185,16 +171,16 @@ const styles = StyleSheet.create({
       backgroundColor: '#fff',
       padding: 17,
     },
-    searchingText: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      color: '#333',  // 검색 중일 때 텍스트 색상
-      textAlign: 'center',
-      marginVertical: 20,  // 위아래 여백 추가
+    searchbg: {
+      flex: 1,
+      marginTop: 50,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     noResultsText: {
+      flex: 1,
       fontSize: 16,
-      color: '#888',  // 검색 결과 없을 때 색상
+      color: '#888',
       textAlign: 'center',
       marginTop: 20,
     },

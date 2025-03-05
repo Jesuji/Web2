@@ -41,7 +41,7 @@ function ProfileScreen({ navigation }) {
             <Text style={styles.nicknameSuffix}> 님</Text>
           </View> 
           <Text style={styles.profileCountry}>{profile?.nationality ?? " - "}</Text>
-          <Text style={styles.profileCountry}>{profile?.age ?? " - "}세</Text>
+          <Text style={styles.profileAge}>{profile?.age ?? " - "}세</Text>
         </View>
         
         <TouchableOpacity style={styles.editButton}>
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   nameContainer: {
     flexDirection: 'row', // 수평으로 배치
     alignItems: 'center', // 텍스트 세로 정렬
-    marginBottom: 3,
+    marginBottom: 6,
   },
   nicknameSuffix: {
     fontSize: 15,
@@ -115,14 +115,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   profileCountry: {
-    marginTop: 5,
+    marginTop: 3,
     fontSize: 15,
     color: '#888',
   },
-  profileStatus: {
-    marginTop: 5,
-    fontSize: 14,
-    color: '#000',
+  profileAge: {
+    marginTop: 2,
+    fontSize: 15,
+    color: '#888',
   },
   editButton: {
     padding: 5,

@@ -5,6 +5,7 @@ import { postReview, getReview } from '../services/api';
 import ReviewModal from '../components/ReviewModal';
 
 //import { dummyRestaurantDetail } from '../dummy';
+//레스토랑 정보 불러오기전 loading띄우기
 
 const RestaurantDetail = ({route}) => {
   const { restaurantId } = route.params;
@@ -56,7 +57,8 @@ const RestaurantDetail = ({route}) => {
       const responseRestaurant = await getRestaurantById(restaurantId);
       setRestaurant(responseRestaurant.data);
       const responseReview = await getReview(restaurantId);
-      setReviews(responseReview || []);
+      console.log('Review response:', responseReview);
+      setReviews(responseReview.data.reviews || []);
 
       } catch (error) {
         console.error('식당 정보를 가져오는 데 실패했습니다.', error);

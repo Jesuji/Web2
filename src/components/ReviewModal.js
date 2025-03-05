@@ -20,13 +20,19 @@ const ReviewModal = ({ visible, onClose, onSubmit, review, mode }) => {
     }
   }, [review, mode]);
 
-  const handleSubmit = () => {
-      onSubmit({
-        message: reviewText,
-        rating,
-        hashtags: hashtags.join(', '),  // 배열을 쉼표로 구분된 문자열로 변환
-      });
-      onClose();
+  const handleSubmit = () => { //등록, 수정 모드에서 제출시 전달해줄 값들
+    const reviewDTO = {
+      message: reviewText,
+      rating,
+      hashtags: hashtags.join(', '),
+    };
+
+    if (mode === 'edit') {
+      onSubmit(review.id, reviewDTO); // 수정 모드 → review.id가 존재
+    } else if (mode === 'create') {
+      onSubmit(reviewDTO); // 생성 모드 → id 필요 없음!
+    }
+    onClose();
   };
 
   const renderTitle = () => {
@@ -102,13 +108,13 @@ const ReviewModal = ({ visible, onClose, onSubmit, review, mode }) => {
 
         {/* 리뷰 텍스트 입력 */}
         <TextInput
-        style={styles.input}
-        placeholder="노마드 이용자들에게 생생한 후기를 전달해주세요!"
-        multiline
-        value={reviewText}
-        onChangeText={setReviewText}
-        editable={mode !== 'view'} // 조회 모드에서는 수정 불가능
-      />
+          style={styles.input}
+          placeholder="노마드 이용자들에게 생생한 후기를 전달해주세요!"
+          multiline
+          value={reviewText}
+          onChangeText={setReviewText}
+          editable={mode !== 'view'} // 조회 모드에서는 수정 불가능
+        />
 
         {/* 해시태그 입력 */}
         <View style={styles.tagInputContainer} pointerEvents={mode === 'view' ? 'none' : 'auto'}>

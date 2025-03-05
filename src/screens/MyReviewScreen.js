@@ -3,7 +3,6 @@ import { View, Text, FlatList, TouchableOpacity, Alert, StyleSheet } from 'react
 import { Swipeable } from 'react-native-gesture-handler';
 import ReviewModal from '../components/ReviewModal';
 import { getMyReview, updateReview, deleteReview } from '../services/api';
-import { dummyGetMyReview } from '../dummy';
 
 const MyReviewScreen = ({route}) => {
   const { reviewCount } = route.params;
@@ -20,18 +19,18 @@ const MyReviewScreen = ({route}) => {
   const fetchReviews = async () => {
     try {
       const response = await getMyReview();
-      setReviews(response);
+      setReviews(response); // 받아온 전체 리뷰 목록
     } catch (error) {
       console.error("리뷰 목록 불러오기 실패:", error);
     }
   };
-  
+
   // 리뷰 조회
   const handleView = (review) => {
     setSelectedReview(review);
     setMode('view');
     setModalVisible(true);
-  };;
+  };
 
   // 리뷰 수정
   const handleEdit = (review) => {
@@ -40,15 +39,17 @@ const MyReviewScreen = ({route}) => {
     setModalVisible(true);
   };
 
-  // 수정 완료 후 처리
-  const handleReviewSubmit = async (reviewId, updateDTO) => {
-    try {
-      console.log('업데이트 요청:', reviewId, updateDTO); //ok
+  // 수정 제출버튼 클릭시
+  const handleEditSubmit = async (reviewId, updateDTO) => {
+      try {
       const response = await updateReview(reviewId, updateDTO);
-      console.log('서버 응답:', response);//안됨
-      setReviews((prevReviews) =>
-        prevReviews.map((r) => (r.id === reviewId ? response : r))
-      );
+      console.log('서버 응답:', response); //수정성공
+      setTimeout(async () => {
+        const updatedReviews = await getMyReview();
+        setReviews(updatedReviews || []);
+      }, 500);
+      Alert.alert("수정이 완료되었습니다!");
+
       setModalVisible(false);
     } catch (error) {
       console.error('리뷰 수정 실패:', error);
@@ -64,7 +65,10 @@ const MyReviewScreen = ({route}) => {
         onPress: async () => {
           try {
             await deleteReview(reviewId);
-            setReviews((prevReviews) => prevReviews.filter((review) => review.id !== reviewId));
+            setTimeout(async () => {
+              const updatedReviews = await getMyReview();
+              setReviews(updatedReviews || []);
+            }, 500);
           } catch (error) {
             console.error("리뷰 삭제 실패:", error);
           }
@@ -109,7 +113,7 @@ const MyReviewScreen = ({route}) => {
         <ReviewModal
           visible={modalVisible}
           onClose={() => setModalVisible(false)}
-          onSubmit={handleReviewSubmit}
+          onSubmit={mode === 'edit' ? handleEditSubmit : undefined} //view, delete 모드에서는 동작안하게
           review={selectedReview}
           mode={mode}
         />

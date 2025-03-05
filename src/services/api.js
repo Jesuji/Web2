@@ -61,7 +61,21 @@ const postReview = async (restaurantId, reviewDTO) => {
 };
 
 //리뷰 수정
-const updateReview = (reviewId, updateDTO) => api.patch(`/reviews/update?reviewId=${reviewId}`, updateDTO);
+const updateReview = async (reviewId, updateDTO) => {
+  try {
+    const formData = new FormData();
+    formData.append('updateDTO', JSON.stringify(updateDTO));
+
+    // POST 요청 보내기
+    const response = await api.patch(`/reviews/update?reviewId=${reviewId}`, formData);
+
+    return response; // 응답 반환
+  } catch (error) {
+    console.error("리뷰 수정 실패:", error.response?.data || error.message);
+    throw error; // 오류 처리
+  }
+};
+
 //리뷰 삭제
 const deleteReview = (reviewId) => api.delete(`/reviews/delete/${reviewId}`);
 
