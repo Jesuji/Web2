@@ -19,7 +19,7 @@ const MyReviewScreen = ({route}) => {
   const fetchReviews = async () => {
     try {
       const response = await getMyReview();
-      setReviews(response); // 받아온 전체 리뷰 목록
+      setReviews(response.data || []); // 받아온 전체 리뷰 목록
     } catch (error) {
       console.error("리뷰 목록 불러오기 실패:", error);
     }
@@ -44,16 +44,12 @@ const MyReviewScreen = ({route}) => {
       try {
       const response = await updateReview(reviewId, updateDTO);
       console.log('서버 응답:', response); //수정성공
-      setTimeout(async () => {
-        const updatedReviews = await getMyReview();
-        setReviews(updatedReviews || []);
-      }, 500);
       Alert.alert("수정이 완료되었습니다!");
-
-      setModalVisible(false);
+      await fetchReviews();
     } catch (error) {
       console.error('리뷰 수정 실패:', error);
     }
+    setModalVisible(false);
   };
 
   // 리뷰 삭제
@@ -64,12 +60,10 @@ const MyReviewScreen = ({route}) => {
         text: "삭제",
         onPress: async () => {
           try {
-            await deleteReview(reviewId);
-            setTimeout(async () => {
-              const updatedReviews = await getMyReview();
-              setReviews(updatedReviews || []);
-            }, 500);
-          } catch (error) {
+              await deleteReview(reviewId);
+              Alert.alert("삭제가 완료되었습니다!");
+              await fetchReviews();
+            }catch (error) {
             console.error("리뷰 삭제 실패:", error);
           }
         },
@@ -92,7 +86,7 @@ const MyReviewScreen = ({route}) => {
     <View style={styles.container}>
       <Text style={styles.title}> 내가 작성한 리뷰 {reviewCount}</Text>
       <FlatList
-        data={reviews.data}
+        data={reviews}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
         <TouchableOpacity onPress={() => handleView(item)}>

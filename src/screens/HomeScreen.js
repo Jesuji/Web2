@@ -26,8 +26,8 @@ const HomeScreen = () => {
   const geoLocation = () => {
     Geolocation.getCurrentPosition(
       (position) => {
-        const lat = 35.479378341721;
-        const lon = 128.75233566843;
+        const lat = 35.1587;
+        const lon = 129.1181;
 
         setLatitude(lat);
         setLongitude(lon);
@@ -82,6 +82,7 @@ const HomeScreen = () => {
       setIsSearching(true);
       searchRestaurants(query)
         .then((response) => {
+          console.log('검색 결과:', response.data);
           setSearchedRestaurants(response.data);
         })
         .catch((error) => {
@@ -105,24 +106,26 @@ const HomeScreen = () => {
           onChange={handleSearch}
         />
 
-
         {isSearching ? (
-          <View style={styles.searchbg}>
-          <Image source={require('../../assets/images/searchbg.png')} style={styles.searchbgimg} resizeMode="contain"/>
-          <Text style={styles.noResultsText}>그리운 고향 메뉴를 검색해보세요</Text>
-          </View>
-        ) : searchedRestaurants.length > 0 ? (
-          <FlatList
-            data={searchedRestaurants}
-            renderItem={({ item }) => <RestaurantItem item={item} />}
-            keyExtractor={(item) => (item.id ? item.id.toString() : item.name)}
-          />
-        ) : searchQuery.length > 0 ? (
-          <View style={styles.searchbg}>
-          <Image source={require('../../assets/images/error.png')} style={styles.searchbgimg} resizeMode="contain"/>
-          <Text style={styles.noResultsText}>검색 결과가 없습니다.</Text>
-          </View>
+          <>
+            {searchedRestaurants.length === 0 ? (
+              <View style={styles.searchbg}>
+              <Image source={require('../../assets/images/error.png')} style={styles.searchbgimg} resizeMode="contain"/>
+              <Text style={styles.noResultsText}>검색 결과가 없습니다.</Text>
+              </View>
+            ) : (
+              // 검색된 데이터 렌더링
+              <FlatList
+                data={searchedRestaurants}
+                renderItem={({ item }) => <RestaurantItem item={item} />}
+                keyExtractor={(item) => item.id.toString()}
+              />
+            )}
+          </>
         ) : null}
+
+
+
 
         {!isSearching && searchedRestaurants.length === 0 && (
         <>
@@ -183,7 +186,7 @@ const styles = StyleSheet.create({
     },
     searchbgimg: {
       width: '100%',
-      height: 70,
+      height: 60,
     },
     noResultsText: {
       flex: 1,

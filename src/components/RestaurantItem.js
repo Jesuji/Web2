@@ -22,7 +22,6 @@ const RestaurantItem = ({ item }) => {
   );
   
 };
-  
 
 
 const styles = StyleSheet.create({

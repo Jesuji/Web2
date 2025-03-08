@@ -39,7 +39,7 @@ const ChatScreen = ({ route, navigation }) => {
 
     return () => {
         if (ws.current) {
-            ws.current.close();
+            ws.current.close(); //clean up
         }};
   }, [othername]);
 
@@ -114,7 +114,7 @@ const ChatScreen = ({ route, navigation }) => {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={styles.backButton}>←</Text>
         </TouchableOpacity>
-        <Image source={require('../assets/images/profile.png')} style={styles.profileImage} />
+        <Image source={require('../../assets/images/profile.png')} style={styles.profileImage} />
         <View>
           <Text style={styles.nickname}>{othername}</Text>
           <Text style={styles.status}>대한민국</Text>
@@ -157,6 +157,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
+    marginTop: 15,
   },
   backButton: {
     fontSize: 24,
@@ -173,6 +174,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   status: {
+    marginTop: 3,
     fontSize: 14,
     color: '#888',
   },

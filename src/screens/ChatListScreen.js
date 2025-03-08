@@ -34,7 +34,7 @@ const ChatListScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>내 채팅</Text>
+      <Text style={styles.title}>채팅 목록</Text>
       <FlatList
         data={users}
         keyExtractor={(item) => item.nickname}
@@ -59,9 +59,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
+    fontSize: 18,
+    marginVertical: 10,
   },
     userItem: {
     flexDirection: 'row',

@@ -12,6 +12,7 @@ import RestaurantDetailScreen from './screens/RestaurantDetailScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import MyReviewScreen from './screens/MyReviewScreen';
 import ChatListScreen from './screens/ChatListScreen';
+import ChatScreen from './screens/ChatScreen';
 
 
 const Stack = createStackNavigator();
@@ -52,7 +53,7 @@ const App = () => {
         name='Profile'
         component={ProfileScreen}
         options={{
-          title: '프로필',
+          title: '마이페이지',
           headerBackTitle: '',
         }}
       />
@@ -68,9 +69,19 @@ const App = () => {
         name='ChatList'
         component={ChatListScreen}
         options={{
-          title: '채팅목록',
+          title: '채팅',
           headerBackTitle: '',
           ...TransitionPresets.SlideFromLeftIOS,
+
+        }}
+      />
+      <Stack.Screen
+        name='Chat'
+        component={ChatScreen}
+        options={{
+          title: '채팅',
+          headerBackTitle: '',
+          headerShown: false,
 
         }}
       />
