@@ -1,6 +1,7 @@
 import {React, useState, useEffect} from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { useUser } from '../contexts/UserContext';
+import { useReview } from '../contexts/ReviewContext'; 
 import { logout } from '../services/auth';
 import { getMyProfile } from '../services/api';
 
@@ -10,6 +11,7 @@ function ProfileScreen({ navigation }) {
   const [profile, setProfile] = useState(null);
 
   const { user, setUser } = useUser();
+  const { reviewCount } = useReview();
 
   const handleLogout = async () => {
     await logout(setUser); // 로그아웃 요청
@@ -40,8 +42,8 @@ function ProfileScreen({ navigation }) {
             <Text style={styles.profileName}>{user?.nickname}</Text>
             <Text style={styles.nicknameSuffix}> 님</Text>
           </View> 
-          <Text style={styles.profileCountry}>{profile?.nationality ?? " null "}</Text>
-          <Text style={styles.profileAge}>{profile?.age ?? " null "}세</Text>
+          <Text style={styles.profileCountry}>{profile?.nationality}</Text>
+          <Text style={styles.profileAge}>{profile?.age}세</Text>
         </View>
         
         <TouchableOpacity style={styles.editButton}>
@@ -51,9 +53,9 @@ function ProfileScreen({ navigation }) {
       </View>
 
       {/* 최근 작성한 리뷰 */}
-      <TouchableOpacity style={styles.reviewSection}  onPress={()=> navigation.navigate('MyReview', { reviewCount: profile?.reviewCount })}>
+      <TouchableOpacity style={styles.reviewSection}  onPress={()=> navigation.navigate('MyReview', { reviewCount: reviewCount })}>
           <Text style={styles.reviewTitle}>
-            최근 작성한 리뷰 {profile?.reviewCount}</Text>
+            최근 작성한 리뷰  {reviewCount}</Text>
       </TouchableOpacity>
 
       

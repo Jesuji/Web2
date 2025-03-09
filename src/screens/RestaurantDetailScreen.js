@@ -1,17 +1,15 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, Alert } from 'react-native';
-import { getRestaurantById } from '../services/api';
-import { postReview, getReview } from '../services/api';
+import { getRestaurantById, getReview } from '../services/api';
+import { useReview } from '../contexts/ReviewContext';
 import ReviewModal from '../components/ReviewModal';
 
-//import { dummyRestaurantDetail } from '../dummy';
-//레스토랑 정보 불러오기전 loading띄우기
 
 const RestaurantDetail = ({route}) => {
   const { restaurantId } = route.params;
+  const { reviews, setReviews, addReview } = useReview();
 
   const [restaurant, setRestaurant] = useState(null);
-  const [reviews, setReviews] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
 
   const flatListRef = useRef(null);
@@ -20,51 +18,24 @@ const RestaurantDetail = ({route}) => {
       flatListRef.current.scrollToIndex({ index: 0, animated: true });
     }
   };
-
   useEffect(() => {
     if (reviews.length > 0) {
       scrollToReviews(); // 리뷰가 업데이트된 후 스크롤
     }
   }, [reviews]);
 
-  // useEffect(() => {
-  //   const fetchRestaurantDetails = () => {
-  //     try {
-  //     // 레스토랑 정보 가져오기
-  //     const foundRestaurant = dummyRestaurantDetail.find(
-  //       (item) => item.id === restaurantId
-  //     );
-
-  //     if (foundRestaurant) {
-  //       setRestaurant(foundRestaurant);
-  //       setReviews(foundRestaurant.reviews || []); // reviews가 없으면 빈 배열로 설정
-  //       } else {
-  //         console.error('식당 정보를 찾을 수 없습니다.', error);
-  //       }
-  //     } catch (err) {
-  //       console.error('식당 정보를 가져오는 데 실패했습니다.', error);
-  //     } 
-  //   };
-
-  //   fetchRestaurantDetails();
-  // }, [restaurantId]);
-
-  
   useEffect(() => {
     const fetchRestaurantDetails = async() => {
       try {
       // 레스토랑 정보 가져오기
       const responseRestaurant = await getRestaurantById(restaurantId);
       setRestaurant(responseRestaurant.data);
-      const responseReview = await getReview(restaurantId);
-      console.log('Review response:', responseReview);
-      setReviews(responseReview.data.reviews || []);
-
+      const responseReviews = await getReview(restaurantId);
+      setReviews(responseReviews.data);
       } catch (error) {
         console.error('식당 정보를 가져오는 데 실패했습니다.', error);
-      } 
+      }
     };
-
     fetchRestaurantDetails();
   }, [restaurantId]);
 
@@ -93,12 +64,12 @@ const RestaurantDetail = ({route}) => {
       keyExtractor={(item, index) => index.toString()}
       ListHeaderComponent={
         <View style={styles.container}>
-          <Image source={{ uri: restaurant.imageUrl }} style={styles.restaurantImage} resizeMode='cover'/>
           <Text style={styles.address}>📍 {restaurant.address}</Text>
-          <Text style={styles.weekdays}>📍 평일 운영시간: {restaurant.weekdays}</Text>
-          <Text style={styles.weekend}>📍 주말 운영시간: {restaurant.weekend}</Text>
+          <Text style={styles.weekdays}>📍 평일: {restaurant.weekdays}</Text>
+          <Text style={styles.weekend}>📍 주말: {restaurant.weekend}</Text>
           <Text style={styles.rating}>📍 평점: {restaurant.averageRating}</Text>
           <Text style={styles.reviewCount}>📍 리뷰 수: {restaurant.reviewCount}</Text>
+          <Image source={{ uri: restaurant.imageUrl }} style={styles.restaurantImage} resizeMode='cover'/>
 
           {/* 리뷰 보기 버튼 */}
           <View style={styles.reviewButton}>
@@ -111,9 +82,10 @@ const RestaurantDetail = ({route}) => {
             onClose={() => setModalVisible(false)}
             onSubmit={async (reviewDTO) => {
               try {
-                await postReview(restaurantId, reviewDTO);
+                await addReview(restaurantId, reviewDTO);
                 Alert.alert("리뷰 등록 완료!");
-                // 해당 레스토랑 최신 리뷰 목록 불러오기 (지연방지)
+
+                // ✅ 최신 레스토랑 데이터 가져오기 (평점 & 리뷰 수 반영)
                 setTimeout(async () => {
                   const updatedReviews = await getReview(restaurantId);
                   setReviews(updatedReviews || []);
@@ -156,33 +128,32 @@ const RestaurantDetail = ({route}) => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-      padding: 20,
-      backgroundColor: '#fff',
-    },
     fixedHeader: {
       position: 'absolute',
       top: 0,
       left: 0,
       right: 0,
       backgroundColor: '#fff',
-      padding: 25,
+      padding: 27,
     },
     name: {
       fontSize: 26,
       fontWeight: 'bold',
-      marginBottom: 15,
+      marginBottom: 10,
     },
     category: {
       fontSize: 18,
       color: '#888',
-      marginBottom: 20,
+    },
+    container: {
+      padding: 20,
+      backgroundColor: '#fff',
     },
     restaurantImage: {
       width: '100%',
       height: 200,
       borderRadius: 8,
-      marginBottom: 20,
+      marginTop: 25,
     },
     address: {
       fontSize: 16,

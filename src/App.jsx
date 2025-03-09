@@ -3,6 +3,7 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { UserProvider } from './contexts/UserContext';
+import { ReviewProvider } from './contexts/ReviewContext';
 import { TransitionPresets } from '@react-navigation/stack';
 
 import SignUpScreen from './screens/SignUpScreen';
@@ -19,6 +20,7 @@ const Stack = createStackNavigator();
 
 const App = () => {
   return (
+    <ReviewProvider>
     <UserProvider>
       <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
@@ -44,7 +46,7 @@ const App = () => {
         name="RestaurantDetail"
         component={RestaurantDetailScreen}
         options={{
-          title: '음식점 상세 정보',
+          title: '상세 정보',
           headerBackTitle: '',
           presentation: 'modal'
           }}/>
@@ -79,8 +81,6 @@ const App = () => {
         name='Chat'
         component={ChatScreen}
         options={{
-          title: '채팅',
-          headerBackTitle: '',
           headerShown: false,
 
         }}
@@ -89,6 +89,7 @@ const App = () => {
       </Stack.Navigator>
     </NavigationContainer>
     </UserProvider>
+    </ReviewProvider>
   );
 };
 

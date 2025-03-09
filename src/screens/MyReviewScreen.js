@@ -2,28 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import ReviewModal from '../components/ReviewModal';
-import { getMyReview, updateReview, deleteReview } from '../services/api';
+import { useReview } from '../contexts/ReviewContext';
 
 const MyReviewScreen = ({route}) => {
   const { reviewCount } = route.params;
-  const [reviews, setReviews] = useState([]); //전체 리뷰 목록
+  const { reviews, fetchMyReviews, editReview, removeReview } = useReview();
   const [selectedReview, setSelectedReview] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [mode, setMode] = useState('view');
 
   // 리뷰 목록 불러오기
   useEffect(() => {
-    fetchReviews();
+    fetchMyReviews();
   }, []);
-
-  const fetchReviews = async () => {
-    try {
-      const response = await getMyReview();
-      setReviews(response.data || []); // 받아온 전체 리뷰 목록
-    } catch (error) {
-      console.error("리뷰 목록 불러오기 실패:", error);
-    }
-  };
 
   // 리뷰 조회
   const handleView = (review) => {
@@ -42,10 +33,8 @@ const MyReviewScreen = ({route}) => {
   // 수정 제출버튼 클릭시
   const handleEditSubmit = async (reviewId, updateDTO) => {
       try {
-      const response = await updateReview(reviewId, updateDTO);
-      console.log('서버 응답:', response); //수정성공
+      await editReview(reviewId, updateDTO);
       Alert.alert("수정이 완료되었습니다!");
-      await fetchReviews();
     } catch (error) {
       console.error('리뷰 수정 실패:', error);
     }
@@ -60,9 +49,8 @@ const MyReviewScreen = ({route}) => {
         text: "삭제",
         onPress: async () => {
           try {
-              await deleteReview(reviewId);
+              await removeReview(reviewId);
               Alert.alert("삭제가 완료되었습니다!");
-              await fetchReviews();
             }catch (error) {
             console.error("리뷰 삭제 실패:", error);
           }
@@ -84,7 +72,7 @@ const MyReviewScreen = ({route}) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}> 내가 작성한 리뷰 {reviewCount}</Text>
+      <Text style={styles.title}> 총 {reviewCount} 개의 리뷰를 남겨주셨어요!</Text>
       <FlatList
         data={reviews}
         keyExtractor={(item) => item.id.toString()}
@@ -123,7 +111,7 @@ const styles = StyleSheet.create({
       backgroundColor: '#fff',
     },
     title: {
-      fontSize: 20,
+      fontSize: 19,
       fontWeight: 'bold',
       marginBottom: 20,
     },
