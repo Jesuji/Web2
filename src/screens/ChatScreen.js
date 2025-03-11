@@ -13,6 +13,7 @@ const ChatScreen = ({ route, navigation }) => {
     const recipient = othername || '';
 
     const ws = useRef(null);
+    const flatListRef = useRef(null);
     const [message, setMessage] = useState(''); // 사용자가 입력 중인 메시지
     const [messages, setMessages] = useState([]); //채팅방의 메시지 기록 저장
 
@@ -107,6 +108,9 @@ const ChatScreen = ({ route, navigation }) => {
      // 로컬에서 메시지 상태 업데이트 (전송 확인까지 기다리지 않음)
      setMessages((prevMessages) => [...prevMessages, messageToSend]);
      setMessage('');
+     setTimeout(() => {
+      flatListRef.current?.scrollToEnd({ animated: true });
+    }, 100);
     };
 
     // ✅ 메시지 렌더링
@@ -135,10 +139,12 @@ const ChatScreen = ({ route, navigation }) => {
       </View>
 
       <FlatList
+        ref={flatListRef}
         data={messages}
         keyExtractor={(item, index) => index.toString()}
         renderItem={renderMessage}
         contentContainerStyle={styles.messagesContainer}
+        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
       />
 
       <View style={styles.inputContainer}>
