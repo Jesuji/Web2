@@ -82,8 +82,8 @@ const deleteReview = (reviewId) => api.delete(`/reviews/delete/${reviewId}`);
 
 //채팅
 const getChatList = () => api.get('/users');
-const getChatmessage = (senderNickname, recipientNickname) => api.get('/messages',{senderNickname, recipientNickname});
-const postChatmessage = (senderNickname, recipientNickname, content) => api.post('/messages', {senderNickname, recipientNickname, content});
+const getChatmessage = ({senderNickname, recipientNickname}) => api.get(`/messages?senderNickname=${senderNickname}&recipientNickname=${recipientNickname}`);
+const postChatmessage = ({senderNickname, recipientNickname, content}) => api.post('/messages', {senderNickname, recipientNickname, content});
 
 
 

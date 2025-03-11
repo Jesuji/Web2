@@ -19,9 +19,11 @@ export const login = async (email, password, setUser) => {
       console.log('세션 쿠키 저장 성공');
       // 세션 쿠키는 자동으로 관리, 별도 처리 필요 x
     }
-    console.log('받아온 유저 데이터:', response.data);
+    console.log('로그인 응답:', response.data);
 
-    setUser({ ...response.data, nickname: response.data.nickname });
+    // userNickname 가져오기
+    const userNickname = cookies['userNickname']?.value;
+    setUser({ ...response.data, nickname: userNickname });
 
     return { status: 200, data: response.data };// 로그인 성공 후 서버 응답 데이터 반환
   } catch (error) {

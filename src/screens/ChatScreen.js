@@ -2,17 +2,20 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Image, Alert, Platform} from 'react-native';
 import {useUser} from '../contexts/UserContext';
 import { getChatmessage, postChatmessage } from '../services/api';
+import { WS_SERVER_URL } from '../services/config';
 
 const ChatScreen = ({ route, navigation }) => {
 
-    const { user } = useUser();
-    const myname = user.nickname;
+    const { user } = useUser(); // 현재 로그인된 유저 정보 가져오기
     const { othername } = route.params;
 
+    const sender = user?.nickname || '';
+    const recipient = othername || '';
+
     const ws = useRef(null);
-    const [messages, setMessages] = useState([]);
-    const [message, setMessage] = useState('');
-  
+    const [message, setMessage] = useState(''); // 사용자가 입력 중인 메시지
+    const [messages, setMessages] = useState([]); //채팅방의 메시지 기록 저장
+
 
 // ✅ WebSocket 연결
   useEffect(() => {
@@ -23,34 +26,45 @@ const ChatScreen = ({ route, navigation }) => {
         ws.current.close(); // 기존 WebSocket이 있으면 닫아줌
     }
 
-    ws.current = new WebSocket(`ws://${Platform.OS === 'ios' ? 'localhost' : '10.0.2.2'}:8080/ws/chat?sender=${myname}&recipient=${othername}`);
+    console.log("WebSocket 연결 정보:", typeof(sender), typeof(recipient));
 
-    ws.current.onopen = () => console.log('WebSocket 연결 성공');
+    ws.current = new WebSocket(`wss://${WS_SERVER_URL}/ws/chat`);
 
+    ws.current.onopen = () => console.log('New Client Connected');
+
+    //서버에서 보내는 실시간 메시지 처리
     ws.current.onmessage = (event) => {
-      console.log('서버에서 받은 메시지:', event.data);
-      const messageData = JSON.parse(event.data);
-      setMessages((prevMessages) => [...prevMessages, messageData]);
+      try {
+        const messageData = JSON.parse(event.data);
+        console.log('서버에서 받은 메시지:', messageData);
+        setMessages((prevMessages) => [...prevMessages, messageData]);
+      } catch (error) {
+        console.error('JSON 파싱 오류:', error);
+      }
     };
 
     ws.current.onerror = (error) => console.error('WebSocket 오류: ', error);
 
-    ws.current.onclose = () => console.log('WebSocket 연결 종료');
+    ws.current.onclose = () => console.log('Client disconnected');
 
     return () => {
         if (ws.current) {
-            ws.current.close(); //clean up
+            ws.current.close();
         }};
-  }, [othername]);
+  }, [recipient]);
 
 
-    // ✅ 메시지 가져오기 (보낸+받은 메시지)
-    const fetchMessages = async (type) => {
+    // ✅ 초기 메시지 가져오기
+    const fetchMessages = async () => {
+      console.log(`📢 메시지 요청: ${sender}, ${recipient}`);
     try {
         const response = await getChatmessage({
-            senderNickname: type === 'send' ? myname : othername,
-            recipientNickname: type === 'receive' ? othername : myname,
+            senderNickname: sender,
+            recipientNickname: recipient,
         });
+
+        console.log('📢 서버 응답:', response);
+        console.log('📢 서버 응답 데이터:', response.data);
 
         const messages = response.data.map((message) => ({
             senderNickname: message.senderNickname,
@@ -65,31 +79,30 @@ const ChatScreen = ({ route, navigation }) => {
     };
 
 
-  // ✅ 메시지 전송
-  const sendMessage = async() => {
-    if (!message.trim()) return;
+    // ✅ 메시지 전송
+    const sendMessage = async() => {
+      if (!message.trim()) return;
 
-      const messageToSend = JSON.stringify({
-        senderNickname: myname,
-        recipientNickname: othername,
-        content: message,
-      });
+        const messageToSend = {
+          senderNickname: sender,
+          recipientNickname: recipient,
+          content: message,
+        };
 
-      // WebSocket이 열려있는 경우에만 메시지 전송
-    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-        ws.current.send(messageToSend);
-        console.log('보낸 메시지: ', messageToSend);
-      } else {
-        console.log('WebSocket이 열려있지 않음.');
+        // WebSocket이 열려있는 경우에만 메시지 전송
+      if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+          ws.current.send(JSON.stringify(messageToSend));
+          console.log('보낸 메시지: ', messageToSend);
+        } else {
+          console.log('WebSocket이 열려있지 않음.');
+        }
+
+        // 서버에 메시지 저장 요청
+        try {
+          await postChatmessage(messageToSend);
+      } catch (error) {
+          console.error('메시지 저장 오류:', error);
       }
-
-      // 서버에 메시지 저장 요청
-      try {
-        await postChatmessage(messageToSend);
-    } catch (error) {
-        console.error('메시지 저장 오류:', error);
-        Alert.alert('오류', '메시지를 서버에 저장하는 데 문제가 발생했습니다.');
-    }
 
      // 로컬에서 메시지 상태 업데이트 (전송 확인까지 기다리지 않음)
      setMessages((prevMessages) => [...prevMessages, messageToSend]);
@@ -101,7 +114,7 @@ const ChatScreen = ({ route, navigation }) => {
         <View
           style={[
             styles.messageBubble,
-            item.senderNickname === myname ? styles.myMessage : styles.otherMessage,
+            item.senderNickname === sender ? styles.myMessage : styles.otherMessage,
           ]}
         >
           <Text style={styles.messageText}>{item.content}</Text>
@@ -116,18 +129,18 @@ const ChatScreen = ({ route, navigation }) => {
         </TouchableOpacity>
         <Image source={require('../../assets/images/profile.png')} style={styles.profileImage} />
         <View>
-          <Text style={styles.nickname}>{othername}</Text>
+          <Text style={styles.nickname}>{recipient}</Text>
           <Text style={styles.status}>대한민국</Text>
         </View>
       </View>
-      
+
       <FlatList
         data={messages}
         keyExtractor={(item, index) => index.toString()}
         renderItem={renderMessage}
         contentContainerStyle={styles.messagesContainer}
       />
-      
+
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -135,11 +148,11 @@ const ChatScreen = ({ route, navigation }) => {
           value={message}
           onChangeText={setMessage}
         />
-        
+
         <TouchableOpacity onPress={sendMessage} style={styles.sendButton}>
           <Text style={styles.sendButtonText}>전송</Text>
         </TouchableOpacity>
-        
+
       </View>
     </KeyboardAvoidingView>
   );
