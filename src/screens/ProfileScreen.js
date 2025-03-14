@@ -11,12 +11,17 @@ function ProfileScreen({ navigation }) {
   const [profile, setProfile] = useState(null);
 
   const { user, setUser } = useUser();
-  const { reviewCount } = useReview();
+  const { myReviewCount, fetchMyReviews } = useReview();
 
   const handleLogout = async () => {
-    await logout(setUser); // 로그아웃 요청
+    await logout(setUser);
     navigation.navigate('SignIn');
 };
+
+  // //처음 화면 렌더링시 서버에서 리뷰 목록 불러오기
+  // useEffect(() => {
+  //   fetchMyReviews();
+  // }, []);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -40,7 +45,7 @@ function ProfileScreen({ navigation }) {
         <View style={styles.profileInfo}>
           <View style={styles.nameContainer}>
             <Text style={styles.profileName}>{user?.nickname}</Text>
-            <Text style={styles.nicknameSuffix}> 님</Text>
+            <Text style={styles.nicknameSuffix}>님</Text>
           </View> 
           <Text style={styles.profileCountry}>{profile?.nationality}</Text>
           <Text style={styles.profileAge}>{profile?.age}세</Text>
@@ -53,9 +58,9 @@ function ProfileScreen({ navigation }) {
       </View>
 
       {/* 최근 작성한 리뷰 */}
-      <TouchableOpacity style={styles.reviewSection}  onPress={()=> navigation.navigate('MyReview', { reviewCount: reviewCount })}>
+      <TouchableOpacity style={styles.reviewSection}  onPress={()=> navigation.navigate('MyReview')}>
           <Text style={styles.reviewTitle}>
-            최근 작성한 리뷰  {reviewCount}</Text>
+            최근 작성한 리뷰  {myReviewCount}</Text>
       </TouchableOpacity>
 
       
@@ -114,14 +119,15 @@ const styles = StyleSheet.create({
   profileName: {
     fontWeight: 'bold',
     fontSize: 18,
+    padding: 5,
   },
   profileCountry: {
-    marginTop: 3,
+    padding: 5,
     fontSize: 15,
     color: '#888',
   },
   profileAge: {
-    marginTop: 2,
+    marginLeft: 5,
     fontSize: 15,
     color: '#888',
   },

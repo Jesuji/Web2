@@ -22,8 +22,10 @@ export const login = async (email, password, setUser) => {
     console.log('로그인 응답:', response.data);
 
     // userNickname 가져오기
-    const userNickname = cookies['userNickname']?.value;
-    setUser({ ...response.data, nickname: userNickname });
+    // const userNickname = cookies['userNickname']?.value;
+    // setUser({ ...response.data, nickname: userNickname });
+    setUser({ ...response.data, nickname: response.data.nickname });
+
 
     return { status: 200, data: response.data };// 로그인 성공 후 서버 응답 데이터 반환
   } catch (error) {

@@ -2,15 +2,18 @@ import React, {useEffect, useState} from 'react';
 import {Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { getRestaurantById } from '../services/api';
+import { useReview } from '../contexts/ReviewContext';
 
 const RestaurantItem = ({ item }) => {
   const nav = useNavigation();
   const [restaurant, setRestaurant] = useState(item);
+  const { getRestaurantReviewCount } = useReview();
+  const reviewCount = getRestaurantReviewCount(item.id); // 전역 레스토랑 리뷰수 가져오기
 
   const fetchRestaurantData = async () => {
     try {
       const response = await getRestaurantById(item.id);
-      setRestaurant(response.data); // 응답 데이터로 상태 업데이트
+      setRestaurant(response.data);
     } catch (error) {
       console.error('레스토랑 정보 가져오기 실패', error);
     }
@@ -20,6 +23,8 @@ const RestaurantItem = ({ item }) => {
   useEffect(() => {
     fetchRestaurantData();
   }, [item.id]);
+
+
 
   const handlePress = () => {
     nav.navigate('RestaurantDetail', {restaurantId: item.id});
@@ -32,7 +37,7 @@ const RestaurantItem = ({ item }) => {
   >
     <Text style={styles.name}>{restaurant.name}</Text>
     <Text style={styles.category}>{restaurant.category}</Text>
-    <Text style={styles.rating}>평점: {restaurant.averageRating} (리뷰 {restaurant.reviewCount})</Text>
+    <Text style={styles.rating}>평점: {restaurant.averageRating} (리뷰 {reviewCount})</Text>
     <Text style={styles.distance}>거리: {restaurant.distance}km</Text>
   </TouchableOpacity>
   );

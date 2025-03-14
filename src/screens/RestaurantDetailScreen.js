@@ -1,16 +1,16 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, Alert } from 'react-native';
-import { getRestaurantById, getReview } from '../services/api';
+import { getRestaurantById } from '../services/api';
 import { useReview } from '../contexts/ReviewContext';
 import ReviewModal from '../components/ReviewModal';
 
 
 const RestaurantDetail = ({route}) => {
   const { restaurantId } = route.params;
-  const { reviews, setReviews, addReview } = useReview();
-
+  const { restaurantReviews, addReview } = useReview();
   const [restaurant, setRestaurant] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const { fetchRestaurantReviews, getRestaurantReviewCount } = useReview();
 
   const flatListRef = useRef(null);
   const scrollToReviews = () => {
@@ -18,35 +18,37 @@ const RestaurantDetail = ({route}) => {
       flatListRef.current.scrollToIndex({ index: 0, animated: true });
     }
   };
-  useEffect(() => {
-    if (reviews.length > 0) {
-      scrollToReviews(); // 리뷰가 업데이트된 후 스크롤
-    }
-  }, [reviews]);
+  // useEffect(() => {
+  //   if ( restaurantReviews[restaurantId]?.length > 0) { 
+  //     scrollToReviews(); // 리뷰가 업데이트된 후 스크롤 (restaurantReviews업데이트 이후 가져오기 위해 reviewCount를 바로 사용하지 않음)
+  //   }
+  // }, [restaurantReviews[restaurantId]?.length]); // 레스토랑 리뷰수 바뀔때 마다 스크롤 변경
 
   useEffect(() => {
     const fetchRestaurantDetails = async() => {
       try {
-      // 레스토랑 정보 가져오기
       const responseRestaurant = await getRestaurantById(restaurantId);
       setRestaurant(responseRestaurant.data);
-      const responseReviews = await getReview(restaurantId);
-      setReviews(responseReviews.data);
+      await fetchRestaurantReviews(restaurantId); //전역상태 레스토랑 리뷰 가져오기
       } catch (error) {
         console.error('식당 정보를 가져오는 데 실패했습니다.', error);
       }
     };
     fetchRestaurantDetails();
-  }, [restaurantId]);
+  }, [restaurantId]); //아이디가 변경될때 서버와 동기화
 
 
   if (!restaurant) {
     return (
       <View style={styles.center}>
-        <Text>식당 정보를 찾을 수 없습니다.</Text>
+        <Text>식당 정보를 가져오고 있습니다..</Text>
       </View>
     );
   }
+
+  const reviews = restaurantReviews[restaurantId] || [];
+  const reviewCount = getRestaurantReviewCount(restaurantId);
+
   return (
 
     <View style={{ flex: 1, backgroundColor: '#fff'}}>
@@ -68,12 +70,12 @@ const RestaurantDetail = ({route}) => {
           <Text style={styles.weekdays}>📍 평일: {restaurant.weekdays}</Text>
           <Text style={styles.weekend}>📍 주말: {restaurant.weekend}</Text>
           <Text style={styles.rating}>📍 평점: {restaurant.averageRating}</Text>
-          <Text style={styles.reviewCount}>📍 리뷰 수: {restaurant.reviewCount}</Text>
+          <Text style={styles.reviewCount}>📍 리뷰 수: {reviewCount}</Text>
           <Image source={{ uri: restaurant.imageUrl }} style={styles.restaurantImage} resizeMode='cover'/>
 
           {/* 리뷰 보기 버튼 */}
           <View style={styles.reviewButton}>
-          <TouchableOpacity style={styles.showReview}   onPress={() => setModalVisible(true)}>
+          <TouchableOpacity style={styles.showReview}   activeOpacity={0.7} onPress={() => setModalVisible(true)}>
             <Text style={styles.showReviewText}>리뷰작성</Text>
           </TouchableOpacity>
 
@@ -84,12 +86,6 @@ const RestaurantDetail = ({route}) => {
               try {
                 await addReview(restaurantId, reviewDTO);
                 Alert.alert("리뷰 등록 완료!");
-
-                // ✅ 최신 레스토랑 데이터 가져오기 (평점 & 리뷰 수 반영)
-                setTimeout(async () => {
-                  const updatedReviews = await getReview(restaurantId);
-                  setReviews(updatedReviews || []);
-                }, 500);
               } catch (error) {
                 Alert.alert("리뷰 등록 실패", error.message);
               }
@@ -100,7 +96,7 @@ const RestaurantDetail = ({route}) => {
             mode="create"
           />
 
-          <TouchableOpacity style={styles.showReview} onPress={scrollToReviews}>
+          <TouchableOpacity style={styles.showReview} activeOpacity={0.7} onPress={scrollToReviews}>
             <Text style={styles.showReviewText}>리뷰보기</Text>
           </TouchableOpacity>
           </View>

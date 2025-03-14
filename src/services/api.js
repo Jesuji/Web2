@@ -36,6 +36,7 @@ const postMyLocation = (latitude, longitude, radius) => api.post('/restaurants/s
 const getRestaurants = () => api.get('/restaurants');
 
 const searchRestaurants = (query) => api.get(`/restaurants/search?keyword=${query}`);
+//서치할때 Post
 
 const getRestaurantById = (restaurantId) => api.get(`/restaurants/${restaurantId}`);
 

@@ -58,7 +58,7 @@ const HomeScreen = () => {
         latitudeDelta: 0.045,
         longitudeDelta: 0.045,
       };
-      setRegion(newRegion);  // 위치가 바뀌면 region 업데이트
+      setRegion(newRegion);
     }
   }, [latitude, longitude]);
 
@@ -82,7 +82,6 @@ const HomeScreen = () => {
       setIsSearching(true);
       searchRestaurants(query)
         .then((response) => {
-          console.log('검색 결과:', response.data);
           setSearchedRestaurants(response.data);
         })
         .catch((error) => {

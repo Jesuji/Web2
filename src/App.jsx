@@ -23,7 +23,7 @@ const App = () => {
     <ReviewProvider>
     <UserProvider>
       <NavigationContainer>
-      <Stack.Navigator initialRouteName="SignIn">
+      <Stack.Navigator initialRouteName="Home">
 
       <Stack.Screen 
       name='SignUp' 

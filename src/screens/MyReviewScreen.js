@@ -4,17 +4,16 @@ import { Swipeable } from 'react-native-gesture-handler';
 import ReviewModal from '../components/ReviewModal';
 import { useReview } from '../contexts/ReviewContext';
 
-const MyReviewScreen = ({route}) => {
-  const { reviewCount } = route.params;
-  const { reviews, fetchMyReviews, editReview, removeReview } = useReview();
+const MyReviewScreen = () => {
+  const { myReviews, myReviewCount, fetchMyReviews, editReview, removeReview } = useReview();
   const [selectedReview, setSelectedReview] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [mode, setMode] = useState('view');
 
-  // 리뷰 목록 불러오기
-  useEffect(() => {
-    fetchMyReviews();
-  }, []);
+  // //처음 화면 렌더링시 서버에서 리뷰 목록 불러오기
+  // useEffect(() => {
+  //   fetchMyReviews();
+  // }, []);
 
   // 리뷰 조회
   const handleView = (review) => {
@@ -72,9 +71,9 @@ const MyReviewScreen = ({route}) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}> 총 {reviewCount} 개의 리뷰를 남겨주셨어요!</Text>
+      <Text style={styles.title}> 총 {myReviewCount} 개의 리뷰를 남겨주셨어요!</Text>
       <FlatList
-        data={reviews}
+        data={myReviews}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
         <TouchableOpacity onPress={() => handleView(item)}>

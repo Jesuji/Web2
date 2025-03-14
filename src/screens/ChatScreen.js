@@ -27,7 +27,7 @@ const ChatScreen = ({ route, navigation }) => {
         ws.current.close(); // 기존 WebSocket이 있으면 닫아줌
     }
 
-    console.log("WebSocket 연결 정보:", typeof(sender), typeof(recipient));
+    console.log("WebSocket 연결 정보:", sender, recipient);
 
     ws.current = new WebSocket(`wss://${WS_SERVER_URL}/ws/chat`);
 
@@ -64,9 +64,6 @@ const ChatScreen = ({ route, navigation }) => {
             recipientNickname: recipient,
         });
 
-        console.log('📢 서버 응답:', response);
-        console.log('📢 서버 응답 데이터:', response.data);
-
         const messages = response.data.map((message) => ({
             senderNickname: message.senderNickname,
             recipientNickname: message.recipientNickname,
@@ -93,7 +90,6 @@ const ChatScreen = ({ route, navigation }) => {
         // WebSocket이 열려있는 경우에만 메시지 전송
       if (ws.current && ws.current.readyState === WebSocket.OPEN) {
           ws.current.send(JSON.stringify(messageToSend));
-          console.log('보낸 메시지: ', messageToSend);
         } else {
           console.log('WebSocket이 열려있지 않음.');
         }
