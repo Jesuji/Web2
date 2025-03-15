@@ -38,7 +38,7 @@ const RestaurantItem = ({ item }) => {
     <Text style={styles.name}>{restaurant.name}</Text>
     <Text style={styles.category}>{restaurant.category}</Text>
     <Text style={styles.rating}>평점: {restaurant.averageRating} (리뷰 {reviewCount})</Text>
-    <Text style={styles.distance}>거리: {restaurant.distance}km</Text>
+    <Text style={styles.distance}>거리: {item.distance}km</Text>
   </TouchableOpacity>
   );
   

@@ -88,12 +88,13 @@ const SignInScreen = () => {
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: '#FFFFFF',
-      padding: 35,
-      marginTop: 70,
+      padding: 45,
+      marginTop: 0,
     },
     logo: {
-      width: '50%',
+      width: '53%',
       height: 55,
+      marginTop: 50,
     },
     title: {
       fontSize: 40,
@@ -103,9 +104,9 @@ const SignInScreen = () => {
       marginBottom: 10,
     },
     subtitle: {
-      fontSize: 16,
+      fontSize: 15,
       color: '#000000',
-      marginBottom: 50,
+      marginBottom: 40,
       textAlign: 'center',
     },
     button: {

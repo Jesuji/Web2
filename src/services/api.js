@@ -30,13 +30,12 @@ const postSignOut = () => api.post('/auth/logout');
 // 프로필 조회 API
 const getMyProfile = () => api.get('/my-profile');
 
-// 🍽️ 레스토랑 관련 API
+// 레스토랑 관련 API
 const postMyLocation = (latitude, longitude, radius) => api.post('/restaurants/search/location', { latitude, longitude, radius });
 
 const getRestaurants = () => api.get('/restaurants');
 
-const searchRestaurants = (query) => api.get(`/restaurants/search?keyword=${query}`);
-//서치할때 Post
+const searchRestaurants = (query, latitude, longitude, radius) => api.post(`/restaurants/search?keyword=${query}`, { latitude, longitude, radius });
 
 const getRestaurantById = (restaurantId) => api.get(`/restaurants/${restaurantId}`);
 

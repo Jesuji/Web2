@@ -20,10 +20,10 @@ const Stack = createStackNavigator();
 
 const App = () => {
   return (
-    <ReviewProvider>
     <UserProvider>
+    <ReviewProvider>
       <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator initialRouteName="SignIn">
 
       <Stack.Screen 
       name='SignUp' 
@@ -88,8 +88,8 @@ const App = () => {
 
       </Stack.Navigator>
     </NavigationContainer>
-    </UserProvider>
     </ReviewProvider>
+    </UserProvider>
   );
 };
 

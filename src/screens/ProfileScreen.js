@@ -11,10 +11,10 @@ function ProfileScreen({ navigation }) {
   const [profile, setProfile] = useState(null);
 
   const { user, setUser } = useUser();
-  const { myReviewCount, fetchMyReviews } = useReview();
+  const { setMyReviews, myReviewCount } = useReview();
 
   const handleLogout = async () => {
-    await logout(setUser);
+    await logout(setUser, setMyReviews);
     navigation.navigate('SignIn');
 };
 

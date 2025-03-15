@@ -6,6 +6,7 @@ import Geolocation from '@react-native-community/geolocation';
 import MapView, { Marker } from 'react-native-maps';
 import { postMyLocation, searchRestaurants } from '../services/api';
 import { useNavigation } from '@react-navigation/native';
+import { useReview } from '../contexts/ReviewContext';
 
 import Header from '../components/Header';
 
@@ -21,7 +22,8 @@ const HomeScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [searchedRestaurants, setSearchedRestaurants] = useState([]);
-
+  const {fetchRestaurantReviews} = useReview();
+  const [isFetched, setIsFetched] = useState(false); // fetch 한 번만 실행 체크
 
   const geoLocation = () => {
     Geolocation.getCurrentPosition(
@@ -68,6 +70,13 @@ const HomeScreen = () => {
     postMyLocation(lat, lon, 5)
       .then((response) => {
         setRestaurants(response.data);
+        //console.log('setRestaurants',restaurants);
+        if (!isFetched) {  // 처음 한 번만 실행
+          response.data.forEach((restaurant) => {
+            fetchRestaurantReviews(restaurant.id);
+          });
+          setIsFetched(true);
+        }
       })
       .catch((error) => {
         console.error(error);
@@ -80,9 +89,10 @@ const HomeScreen = () => {
     setSearchQuery(query);
     if (query.length > 0) {
       setIsSearching(true);
-      searchRestaurants(query)
+      searchRestaurants(query, latitude, longitude, 5)
         .then((response) => {
           setSearchedRestaurants(response.data);
+          //console.log('setSearchedRestaurants', response.data);
         })
         .catch((error) => {
           console.error(error);

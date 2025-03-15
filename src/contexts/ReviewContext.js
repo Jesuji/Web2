@@ -1,9 +1,11 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { getMyReview, getReview, postReview, updateReview, deleteReview } from "../services/api";
+import { useUser } from "../contexts/UserContext";
 
 const ReviewContext = createContext();
 
 export const ReviewProvider = ({ children }) => {
+    const { user } = useUser();
     const [myReviews, setMyReviews] = useState([]); // 내가 쓴 리뷰 목록
     const myReviewCount = myReviews.length;
     const [restaurantReviews, setRestaurantReviews] = useState({}); // 레스토랑별 리뷰 목록 (id별 저장)
@@ -11,12 +13,20 @@ export const ReviewProvider = ({ children }) => {
         return restaurantReviews[restaurantId]?.length || 0;
     };
 
+    useEffect(() => {
+        if (user) {
+            setMyReviews([]); // 유저 변경 시 초기화
+            fetchMyReviews();
+        }
+    }, [user]);
+
 
     const fetchMyReviews = async () => {
         try {
             const response = await getMyReview();
-            console.log("fetchMyReviews 실행:  ", response.data);
-            setMyReviews(response.data || []);
+            const sortedReviews = response.data.sort((a, b) => b.id - a.id); // 최신순 정렬
+            setMyReviews(sortedReviews || []);
+            console.log('fetchMyReviews', response.data);
         } catch (error) {
             console.error("내 리뷰 불러오기 실패:", error);
         }
@@ -25,7 +35,6 @@ export const ReviewProvider = ({ children }) => {
     const fetchRestaurantReviews = async (restaurantId) => {
         try {
             const response = await getReview(restaurantId);
-            console.log("fetchRestaurantReviews 실행:  ", response.data);
             setRestaurantReviews((prev) => ({
                 ...prev,
                 [restaurantId]: response.data.reviews,
@@ -46,8 +55,7 @@ export const ReviewProvider = ({ children }) => {
                 ...prev,
                 [restaurantId]: [...(prev[restaurantId] || []), newReview],
             })); // 해당 레스토랑의 리뷰 목록 갱신
-            console.log("현재 내 리뷰 개수:", myReviewCount);  // 자동 업데이트됨
-            console.log("현재 레스토랑 리뷰 개수:", getRestaurantReviewCount());
+
         } catch (error) {
             console.error("리뷰 추가 실패:", error);
         }
@@ -57,7 +65,6 @@ export const ReviewProvider = ({ children }) => {
         try {
             const response = await updateReview(reviewId, updateDTO);
             const updatedReview = response.data;
-            console.log('editReview 응답:', updatedReview);
 
             const restaurantId = updatedReview.restaurantId;
 
@@ -76,16 +83,12 @@ export const ReviewProvider = ({ children }) => {
         }
     };
 
-    const removeReview = async (reviewId, restaurantId) => {
+    const removeReview = async (reviewId) => {
         try {
             await deleteReview(reviewId);
 
             const restaurantId = myReviews.find((r) => r.id === reviewId)?.restaurantId;
-
-            if (!restaurantId) {
-                console.error("레스토랑 ID를 찾을 수 없음");
-                return;
-            }
+            console.log('restaurantId',restaurantId);
     
             setMyReviews((prev) => prev.filter((review) => review.id !== reviewId));
             setRestaurantReviews((prev) => ({
@@ -101,6 +104,7 @@ export const ReviewProvider = ({ children }) => {
         <ReviewContext.Provider
             value={{
                 myReviews,
+                setMyReviews,
                 myReviewCount,
                 restaurantReviews,
                 getRestaurantReviewCount,

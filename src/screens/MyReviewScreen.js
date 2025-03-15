@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import ReviewModal from '../components/ReviewModal';
 import { useReview } from '../contexts/ReviewContext';
 
 const MyReviewScreen = () => {
-  const { myReviews, myReviewCount, fetchMyReviews, editReview, removeReview } = useReview();
+  const { myReviews, myReviewCount, editReview, removeReview } = useReview();
   const [selectedReview, setSelectedReview] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [mode, setMode] = useState('view');
+  const swipeableRefs = useRef({});
 
   // //처음 화면 렌더링시 서버에서 리뷰 목록 불러오기
   // useEffect(() => {
@@ -34,6 +35,7 @@ const MyReviewScreen = () => {
       try {
       await editReview(reviewId, updateDTO);
       Alert.alert("수정이 완료되었습니다!");
+      swipeableRefs.current[reviewId]?.close();
     } catch (error) {
       console.error('리뷰 수정 실패:', error);
     }
@@ -50,6 +52,7 @@ const MyReviewScreen = () => {
           try {
               await removeReview(reviewId);
               Alert.alert("삭제가 완료되었습니다!");
+              swipeableRefs.current[reviewId]?.close();
             }catch (error) {
             console.error("리뷰 삭제 실패:", error);
           }
@@ -77,7 +80,10 @@ const MyReviewScreen = () => {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
         <TouchableOpacity onPress={() => handleView(item)}>
-        <Swipeable renderRightActions={() => renderRightActions(item)}>
+        <Swipeable 
+        ref={(ref) => (swipeableRefs.current[item.id] = ref)}
+        renderRightActions={() => renderRightActions(item)}
+        >
           <View style={styles.reviewItem}>
             <View style={styles.reviewHeader}>
             <Text style={styles.reviewRestaurant}>{item.name}</Text>
