@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { getMyReview, getReview, postReview, updateReview, deleteReview } from "../services/api";
-import { useUser } from "../contexts/UserContext";
+import { useUser } from "./UserContext";
 
 const ReviewContext = createContext();
 

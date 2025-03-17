@@ -3,11 +3,11 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "android": "react-native run-android",
-    "ios": "react-native run-ios",
-    "lint": "eslint .",
-    "start": "react-native start",
-    "test": "jest"
+    "android": "../node_modules/.bin/react-native run-android",
+    "ios": "../node_modules/.bin/react-native run-ios",
+    "lint": "../node_modules/.bin/eslint .",
+    "start": "../node_modules/.bin/react-native start",
+    "test": "../node_modules/.bin/jest"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.1.1",

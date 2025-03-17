@@ -8,8 +8,6 @@ import com.web2.global.SessionService;
 import com.web2.restaurant.RestaurantRepository;
 import com.web2.review.dto.*;
 import com.web2.user.User;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
