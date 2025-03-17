@@ -6,6 +6,7 @@ import com.web2.restaurant.dto.RestaurantDTO;
 import com.web2.restaurant.dto.RestaurantDetailsDTO;
 import com.web2.review.Review;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -15,80 +16,104 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
     private final GooglePlacesService googlePlacesService;
     private final S3Service s3Service;
+    private final DecimalFormat df = new DecimalFormat("#.##");
 
     public List<RestaurantDTO> findRestaurantNearLocation(double latitude, double longitude, double radius, String userNationality) {
         List<Restaurant> restaurants = restaurantRepository.findNearbyRestaurantsByCategory(latitude, longitude, radius, userNationality);
-        DecimalFormat df = new DecimalFormat("#.##");
 
         return restaurants.stream()
-                .map(restaurant -> {
-                    // 현재 위치에서 음식점까지의 거리 계산
-                    double distance = calculateDistance(latitude, longitude, restaurant.getLatitude(), restaurant.getLongitude());
-                    String formattedDistance = df.format(distance);
-
-                    // Google Places API로 사진 가져오기
-                    String photoReference = googlePlacesService.getPhotoReference(restaurant.getName(), restaurant.getAddress());
-                    String photoUrl = (photoReference != null) ? googlePlacesService.getPhotoUrl(photoReference) : null;
-
-                    System.out.println("photoUrl is " + photoUrl); // 로그로 photoUrl 확인
-
-                    // S3에 사진 업로드
-                    String s3ImageUrl = null;
-                    if (photoUrl != null) {
-                        try {
-                            s3ImageUrl = s3Service.uploadFileFromUrl(photoUrl); // 사진 URL을 S3에 업로드
-                            restaurant.setPhotoUrl(s3ImageUrl); // 업로드한 S3 이미지 URL을 restaurant에 설정
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            throw new RuntimeException("S3 업로드 실패", e);
-                        }
-                    } else {
-                        restaurant.setPhotoUrl(null);
-                    }
-
-                    // 업데이트된 정보로 RestaurantDTO 생성
-                    return new RestaurantDTO(
-                            restaurant.getId(),
-                            restaurant.getLatitude(),
-                            restaurant.getLongitude(),
-                            restaurant.getName(),
-                            restaurant.getCategory(),
-                            restaurant.getAddress(),
-                            Double.parseDouble(formattedDistance),
-                            restaurant.getReviews().size(),
-                            calculateAverageRating(restaurant.getReviews()),
-                            restaurant.getPhotoUrl()
-                    );
-                })
+                .map(restaurant -> convertToRestaurantDTO(restaurant, latitude, longitude))
                 .collect(Collectors.toList());
     }
+
 
     // 마커로 띄우고 누르면 restaurantId 기반으로 음식점 정보 상세 조회
     public RestaurantDetailsDTO getRestaurantDetails(Long id) {
         Restaurant restaurant = restaurantRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("음식점을 찾을 수 없습니다."));
 
+        return ReturnRestaurantDetails(restaurant);
+    }
+
+
+    // 검색 키워드 기반으로 RestaurantDTO 반환
+    public List<RestaurantDTO> searchRestaurant(String keyword, double latitude, double longitude, double radius) {
+        List<Restaurant> restaurants = restaurantRepository.findRestaurantsByReviewHashtagsAndLocation(keyword.trim(), latitude, longitude, radius);
+
+        return restaurants.stream()
+                .map(restaurant -> convertToRestaurantDTO(restaurant, latitude, longitude))
+                .collect(Collectors.toList());
+    }
+
+
+    // RestaurantDTO 변환 중복 메서드
+    private RestaurantDTO convertToRestaurantDTO(Restaurant restaurant, double latitude, double longitude) {
+        double distance = calculateDistance(latitude, longitude, restaurant.getLatitude(), restaurant.getLongitude());
+        String formattedDistance = df.format(distance);
+
+        String imageUrl = getOrFetchImageUrl(restaurant);
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            imageUrl = "대표 사진 없음"; // 기본 이미지 설정
+        }
+
+        return new RestaurantDTO(
+                restaurant.getId(),
+                restaurant.getLatitude(),
+                restaurant.getLongitude(),
+                restaurant.getName(),
+                restaurant.getCategory(),
+                restaurant.getAddress(),
+                Double.parseDouble(formattedDistance),
+                restaurant.getReviews().size(),
+                calculateAverageRating(restaurant.getReviews()),
+                imageUrl
+        );
+    }
+
+    // 이미지 URL 가져오거나 새로 설정하는 메서드
+    private String getOrFetchImageUrl(Restaurant restaurant) {
+        String imageUrl = restaurant.getPhotoUrl();
+        log.debug("기존 이미지 URL: {}", imageUrl);
+
+        if(imageUrl == null || imageUrl.isEmpty()) {
+            /*String photoReference = googlePlacesService.getPhotoReference(restaurant.getName(), restaurant.getAddress());
+            String photoUrl = photoReference != null ? googlePlacesService.getPhotoUrl(photoReference) : null;
+*/
+            String photoReference = googlePlacesService.getPhotoReference(restaurant.getName(), restaurant.getAddress());
+            if(photoReference != null) {
+                String photoUrl = googlePlacesService.getPhotoUrl(photoReference);
+                try {
+                    imageUrl = s3Service.uploadFileFromUrl(photoUrl);
+                    restaurant.setPhotoUrl(imageUrl);
+                    restaurantRepository.save(restaurant);
+                    log.info("S3에 업로드 완료: {}", imageUrl);
+                } catch (IOException e) {
+                    log.error("S3 업로드 실패", e);
+                    imageUrl = "대표 사진 없음"; // 기본 이미지 설정
+                }
+            } else {
+                log.warn("Google Places에서 유효한 photoUrl을 찾지 못함");
+                imageUrl = "대표 사진 없음";
+            }
+        }
+            return imageUrl;
+    }
+
+    // RestaurantDetails 변환 메서드
+    public RestaurantDetailsDTO ReturnRestaurantDetails(Restaurant restaurant) {
         double averageRating = calculateAverageRating(restaurant.getReviews());
         int reviewCount = restaurant.getReviews().size();
 
-        // Google Places API로 사진 가져오기
-        String photoReference = googlePlacesService.getPhotoReference(restaurant.getName(), restaurant.getAddress());
-        String photoUrl = photoReference != null ? googlePlacesService.getPhotoUrl(photoReference) : null;
-
-        // S3에 사진 업로드
-        String s3ImageUrl = null;
-        try {
-            s3ImageUrl = photoUrl != null ? s3Service.uploadFileFromUrl(photoUrl) : null;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        String imageUrl = getOrFetchImageUrl(restaurant);
 
         return new RestaurantDetailsDTO(
+                restaurant.getId(),
                 restaurant.getName(),
                 restaurant.getCategory(),
                 restaurant.getAddress(),
@@ -96,43 +121,9 @@ public class RestaurantService {
                 restaurant.getWeekend(),
                 averageRating,
                 reviewCount,
-                s3ImageUrl
+                imageUrl
         );
     }
-
-    //검색 키워드 기반으로 RestaurantDTO 반환
-    public List<RestaurantDetailsDTO> searchRestaurant(String keyword) {
-        String cleanKeyword = keyword.trim(); // 공백 제거
-        List<Restaurant> restaurants = restaurantRepository.findRestaurantsByReviewHashtags(cleanKeyword);
-
-        return restaurants.stream()
-                .map(restaurant -> {
-                    double averageRating = calculateAverageRating(restaurant.getReviews());
-                    int reviewCount = restaurant.getReviews().size();
-
-                    //검색할 때도 사진 추가해야 됨
-                    String photoReference = googlePlacesService.getPhotoReference(restaurant.getName(), restaurant.getAddress());
-                    String photoUrl = photoReference != null ? googlePlacesService.getPhotoUrl(photoReference) : null;
-                    String imageUrl = null; // S3에 업로드하고 URL 반환
-                    try {
-                        imageUrl = photoUrl != null ? s3Service.uploadFileFromUrl(photoUrl) : null;
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-
-                    return new RestaurantDetailsDTO(
-                            restaurant.getName(),
-                            restaurant.getCategory(),
-                            restaurant.getAddress(),
-                            restaurant.getWeekdays(),
-                            restaurant.getWeekend(),
-                            averageRating,
-                            reviewCount,
-                            imageUrl
-                    );
-                }).collect(Collectors.toList());
-    }
-
 
     public Double calculateAverageRating(List<Review> reviews) {
         double average = reviews.stream()

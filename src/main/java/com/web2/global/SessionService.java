@@ -1,6 +1,6 @@
 package com.web2.global;
 
-import com.web2.Exceptions.UnauthorizedException;
+import com.web2.exceptions.UnauthorizedException;
 import com.web2.user.User;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Service;

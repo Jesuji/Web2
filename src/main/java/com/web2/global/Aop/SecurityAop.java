@@ -1,6 +1,6 @@
 package com.web2.global.Aop;
 
-import com.web2.Exceptions.UnauthorizedException;
+import com.web2.exceptions.UnauthorizedException;
 import jakarta.servlet.http.HttpSession;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

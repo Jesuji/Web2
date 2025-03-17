@@ -30,7 +30,6 @@ public class ChatController {
         return ResponseEntity.ok(messages);
     }
 
-
     @PostMapping("/messages")
     public ResponseEntity<Void> sendMessage(
             @RequestBody ChatMessageDTO chatMessageDTO) {

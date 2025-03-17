@@ -1,11 +1,13 @@
 package com.web2.user;
 
-import com.web2.Exceptions.AuthenticationException;
-import com.web2.Exceptions.DuplicateException;
-import com.web2.Exceptions.UserNotFountException;
+import com.web2.exceptions.AuthenticationException;
+import com.web2.exceptions.DuplicateException;
+import com.web2.exceptions.UserNotFountException;
 import com.web2.review.Review;
 import com.web2.review.dto.MyReviewDTO;
 import com.web2.user.dto.*;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserService {
 
+    @PersistenceContext
+    private EntityManager entityManager;
     private final UserRepository userRepository;
 
     // 회원가입 시 중복된 이메일, 이름을 검사
@@ -128,10 +132,11 @@ public class UserService {
         return userRepository.findAll().stream()
                 .map(user -> new SimpleUserResponse(user.getNickname(), user.getEmail())) // 필요한 필드만 포함
                 .collect(Collectors.toList());
-
     }
 
     public List<MyReviewDTO> getMyReviews(User user) {
+        /*//1차 캐시 초기화
+        entityManager.clear();*/
         return user.getReviewList().stream()
                 .map(review -> new MyReviewDTO(
                         review.getId(),

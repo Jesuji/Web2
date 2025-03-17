@@ -6,7 +6,6 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -14,7 +13,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * WebSocket 핸들러 클래스
  * WebSocket을 통해 클라이언트 간의 메시지를 주고받는 로직 처리
  */
-
 @Component
 public class ChatWebSocketHandler extends TextWebSocketHandler {
 
@@ -33,6 +31,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             System.out.println("연결된 사용자: " + userNickname);
         }
     }
+
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {

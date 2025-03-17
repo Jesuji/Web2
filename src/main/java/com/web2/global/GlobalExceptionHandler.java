@@ -1,9 +1,9 @@
 package com.web2.global;
 
-import com.web2.Exceptions.AuthenticationException;
-import com.web2.Exceptions.DuplicateException;
-import com.web2.Exceptions.UnauthorizedException;
-import com.web2.Exceptions.UserNotFountException;
+import com.web2.exceptions.AuthenticationException;
+import com.web2.exceptions.DuplicateException;
+import com.web2.exceptions.UnauthorizedException;
+import com.web2.exceptions.UserNotFountException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

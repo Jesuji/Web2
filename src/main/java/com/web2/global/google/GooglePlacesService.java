@@ -26,8 +26,8 @@ public class GooglePlacesService {
                     .queryParam("fields", "photos,place_id")
                     .queryParam("locationbias", "circle:5000@" + address)
                     .queryParam("key", GOOGLE_API_KEY)
-                    .toUriString();
-*/
+                    .toUriString();*/
+
             RestTemplate restTemplate = new RestTemplate();
             ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
             JSONObject jsonResponse = new JSONObject(response.getBody());
@@ -61,7 +61,7 @@ public class GooglePlacesService {
         }
 
         return UriComponentsBuilder.fromHttpUrl(PLACE_PHOTO_URL)
-                .queryParam("maxwidth", 400)
+                .queryParam("maxwidth", 800)
                 .queryParam("photoreference", photoReference)
                 .queryParam("key", GOOGLE_API_KEY)
                 .toUriString();

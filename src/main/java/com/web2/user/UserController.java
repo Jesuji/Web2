@@ -1,7 +1,7 @@
 package com.web2.user;
 
-import com.web2.global.Aop.SecureEndPoint;
 import com.web2.global.SessionService;
+import com.web2.review.ReviewRepository;
 import com.web2.review.dto.MyReviewDTO;
 import com.web2.user.dto.*;
 import jakarta.servlet.http.Cookie;
@@ -9,10 +9,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +25,7 @@ public class UserController {
 
     public final UserService userService;
     public final SessionService sessionService;
+    private final ReviewRepository reviewRepository;
 
     @PostMapping("/auth/sign")
     public ResponseEntity<ResponseUserDto> sign(@RequestBody SignUser Dto) { // 전달하고 싶은 DTO를 따로 생성해서 전달해도 됨
@@ -126,7 +127,6 @@ public class UserController {
 
         UserDTO userDTO = userService.getprofile(user);
         return userDTO;
-
     }
 
     //@SecureEndPoint
@@ -136,6 +136,8 @@ public class UserController {
         User user = sessionService.validateUser(session);
 
         List<MyReviewDTO> myReviews = userService.getMyReviews(user);
-        return ResponseEntity.ok(myReviews);
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.noCache())
+                .body(myReviews);
     }
 }
