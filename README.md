@@ -77,6 +77,7 @@
 
 
 ### 💬 채팅 기능 
+- WebSocket을 활용한 1:1 채팅 가능
 <img src="https://github.com/user-attachments/assets/f51703a9-d894-4c64-8a67-3e7ec728e57e" height = 500>
 <img src="https://github.com/user-attachments/assets/9785b271-8199-4bf0-94f7-db5b49fc41bd" height = 500>
 
@@ -169,7 +170,8 @@
 ### 🚀 향후 업데이트
 - 다국어 지원(영어, 일본어, 베트남어 등)
 - 리뷰 및 프로필 사진 업로드 기능 추가
-- 사용자가 직접 위치를 설정할 수 있는 기능 추가 
+- 사용자가 직접 위치를 설정할 수 있는 기능 추가
+- 채팅 친구 추천 기능 추가 
 
 <br>
 
